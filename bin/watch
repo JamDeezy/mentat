@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+var debug = require('debug');
+var fsmonitor = require('fsmonitor');
+var child_process = require('child_process');
+
+var running = true;
+var doneFn = function() {
+  console.timeEnd('make DONE');
+  running = false;
+}
+console.time('make DONE');
+var make = child_process.spawn('make', ['default'], { stdio: 'inherit' })
+make.on('exit', doneFn);
+
+var changeFn = function(change) {
+  if (running)
+    return;
+
+  running = true;
+  console.time('make DONE');
+  child = child_process.spawn('make', ['default'], { stdio: 'inherit' })
+  child.on('exit', doneFn);
+};
+
+fsmonitor.watch('./src', null, changeFn);
+fsmonitor.watch('./tests', null, changeFn);
+
+module.exports = fsmonitor;

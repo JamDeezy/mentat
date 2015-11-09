@@ -35,11 +35,11 @@ OUTPUT_HTML := ../f-mentat.html
 
 # options
 default: $(OUTPUT_FILES)
-	@make f-mentat.html
 
 release:
 	@make clean
 	@make
+	@make f-mentat.html
 	@make f-mentat.min.html
 
 clean:
