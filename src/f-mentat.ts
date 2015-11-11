@@ -1,3 +1,4 @@
+/// <reference path="dts/d3.d.ts"/>
 /// <reference path="dts/handlebars.d.ts"/>
 /// <reference path="dts/jquery.d.ts"/>
 /// <reference path="dts/webcomponents.d.ts"/>

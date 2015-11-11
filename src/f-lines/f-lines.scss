@@ -1,0 +1,28 @@
+f-lines {
+  display: block;
+  font: 10px sans-serif;
+  position: relative;
+  overflow: hidden;
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+  }
+
+  .y-axis .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+  }
+
+  .y-axis path {
+    stroke-width: 0;
+  }
+}
