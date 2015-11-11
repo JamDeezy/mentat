@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+var s3 = require('s3');
+var bucket = "f.wishabi.ca";
+var keyPath = "development_ezdz";
+
+var client = s3.createClient({
+  s3Options: {
+    accessKeyId: process.env.S3KEYID,
+    secretAccessKey: process.env.S3SECRET,
+    region: "us-east-1"
+  }
+});
+
+var paramsArr = [{
+  localFile: "f-mentat.min.html",
+  s3Params: {
+    ACL:'public-read',
+    Bucket: bucket,
+    Key: keyPath +"/f-mentat.min.html"
+  }
+}, {
+  localFile: "f-mentat.html",
+  s3Params: {
+    ACL:'public-read',
+    Bucket: bucket,
+    Key: keyPath + "/f-mentat.html"
+  }
+}]
+
+for (var i = 0; i < paramsArr.length; i++) {
+  var uploader = client.uploadFile(paramsArr[i])
+    .on('error', function(err) {
+      console.error("unable to upload:", err.stack);
+    })
+    .on('progress', function() {
+      console.log("progress", uploader.progressMd5Amount,
+        uploader.progressAmount, uploader.progressTotal);
+    })
+    .on('end', function() {
+      console.log("done uploading");
+    });
+}

@@ -1,6 +1,9 @@
+/// <reference path="dts/d3.d.ts"/>
 /// <reference path="dts/handlebars.d.ts"/>
 /// <reference path="dts/jquery.d.ts"/>
+/// <reference path="dts/moment.d.ts"/>
 /// <reference path="dts/webcomponents.d.ts"/>
+/// <reference path="dts/velocity.d.ts"/>
 
 module flipp.mentat {
   function getPropertyDescriptor(obj: Object, prop: string):
@@ -35,12 +38,14 @@ module flipp.mentat {
 
   export function registerElement(elName: string, elBase: Function,
     el: Function, elExtend?: string): void {
-    var options: webcomponents.CustomElementInit = {
-      prototype: Object.create(elBase.prototype, getFullPrototype(el.prototype))
-    };
-    if (elExtend)
-      options.extends = elExtend;
-    return document.registerElement(elName, options);
+    if (!registered(elName)) {
+      var options: webcomponents.CustomElementInit = {
+        prototype: Object.create(elBase.prototype, getFullPrototype(el.prototype))
+      };
+      if (elExtend)
+        options.extends = elExtend;
+      return document.registerElement(elName, options);
+    }
   }
 
   export function registered(elName: string): boolean {

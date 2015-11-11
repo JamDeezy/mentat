@@ -1,0 +1,31 @@
+f-lines {
+  display: block;
+  font: 10px sans-serif;
+  position: relative;
+  overflow: hidden;
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .line {
+    fill: none;
+    stroke-width: 3px;
+  }
+
+  .y-axis .tick {
+    opacity: 0.7;
+  }
+
+  .axis path {
+    display: none;
+  }
+
+  .scanner line {
+    stroke-dasharray: 3 3;
+    stroke: black;
+  }
+}
