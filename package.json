@@ -2,12 +2,16 @@
   "name": "Mentat",
   "version": "0.0.1",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "start": "node ./bin/watch"
+  },
   "dependencies": {
     "node-sass": "3.3.2",
-    "typescript": "1.5.3",
+    "typescript": "1.6.2",
     "vulcanize": "1.14.0",
     "handlebars": "3.0.3",
-    "uglify-js": "2.4.24"
+    "uglify-js": "2.4.24",
+    "debug": "2.2.0",
+    "fsmonitor": "0.2.4"
   }
 }

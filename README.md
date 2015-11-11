@@ -9,3 +9,8 @@ SETUP
 npm install
 make release
 ez
+
+
+TODO
+=====
+proper release packaging (minify!)
