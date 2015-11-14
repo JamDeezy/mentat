@@ -4,7 +4,9 @@ module flipp.mentat {
   export abstract class Graph {
     constructor(private _element: GraphElement) { }
 
+    public onhoverhtml: ((d: any) => string);
     private _skipCallback = false;
+
     attributeChangedCallback(attr: string, old: string, value: string) {
       if (!this._skipCallback) {
         if (attr == 'src') {
@@ -32,6 +34,10 @@ module flipp.mentat {
       "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800",
       "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"
     ];
+
+    /************ SETTINGS ************/
+    protected HOVERABLE = false;
+    protected SUM = false;
 
     /************ Attributes ************/
     get width(): number {
@@ -78,12 +84,30 @@ module flipp.mentat {
       this._element.setAttribute('key', newKey);
     }
 
-    get cols(): Array<string> {
-      return this._element.getAttribute('cols').split(',');
+    get columns(): Array<string> {
+      return this._element.getAttribute('columns').split(',');
     }
 
-    set cols(newCols: Array<string>) {
-      this._element.setAttribute('cols', newCols.join(','));
+    set columns(newCols: Array<string>) {
+      this._element.setAttribute('columns', newCols.join(','));
+    }
+
+    get hoverable(): boolean {
+      var hoverable = this._element.getAttribute('hoverable');
+      return (hoverable) ? hoverable === 'true' : this.HOVERABLE;
+    }
+
+    set hoverable(newHoverable: boolean) {
+      this._element.setAttribute('hoverable', newHoverable.toString());
+    }
+
+    get sum(): boolean {
+      var sum = this._element.getAttribute('sum');
+      return (sum) ? sum === 'true' : this.SUM;
+    }
+
+    set sum(newSum: boolean) {
+      this._element.setAttribute('sum', newSum.toString());
     }
 
     /************ Helpers ************/
@@ -105,15 +129,12 @@ module flipp.mentat {
       for(var key in hash) {
         this._element.setAttribute(key, hash[key])
       }
-
       // if source was changed, load
       if (Object.keys(hash).indexOf('src') >= 0) {
         this.load();
       } else {
         this.render();
       }
-
-      // Turn back on
       this._skipCallback = false;
     }
 
@@ -129,14 +150,17 @@ module flipp.mentat {
   }
 
   export interface GraphElement extends HTMLElement {
-    width: number,
-    height: number,
-    src: string,
-    innerWidth: number,
-    innerHeight: number,
-    key: string,
-    cols: Array<string>,
-    update(hash: any): void;
+    columns            : Array<string>;
+    height             : number;
+    hoverable          : boolean;
+    innerWidth         : number;
+    innerHeight        : number;
+    key                : string;
+    onhoverhtml        : ((d: any) => string);
+    src                : string;
+    sum                : boolean;
+    width              : number;
+    update(hash: any)  : void;
   }
 
   export var GraphElement = registerElement('f-graph', HTMLElement, Graph);

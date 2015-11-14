@@ -13,16 +13,19 @@ f-lines {
 
   .line {
     fill: none;
-    stroke: steelblue;
-    stroke-width: 1.5px;
+    stroke-width: 3px;
   }
 
   .y-axis .tick {
-    stroke: lightgrey;
     opacity: 0.7;
   }
 
-  .y-axis path {
-    stroke-width: 0;
+  .axis path {
+    display: none;
+  }
+
+  .scanner line {
+    stroke-dasharray: 3 3;
+    stroke: black;
   }
 }

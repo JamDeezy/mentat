@@ -1,5 +1,8 @@
 f-bars {
+  display: block;
   font: 10px sans-serif;
+  position: relative;
+  overflow: hidden;
 
   .axis path,
   .axis line {
@@ -8,11 +11,7 @@ f-bars {
     shape-rendering: crispEdges;
   }
 
-  .bar {
-    fill: steelblue;
-  }
-
-  .x.axis path {
+  .axis path {
     display: none;
   }
 }

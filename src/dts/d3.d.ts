@@ -34,6 +34,9 @@ declare module d3 {
      */
     export function selection(): Selection<any>;
 
+
+    export function tip(): any;
+
     module selection {
         export var prototype: Selection<any>;
 

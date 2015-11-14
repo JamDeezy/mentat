@@ -1,5 +1,6 @@
 /// <reference path="../f-mentat.ts"/>
 /// <reference path="../f-graph/f-graph.ts"/>
+/// <reference path="../f-graph/f-tooltip.ts"/>
 
 module flipp.mentat {
   class Bars extends Graph {
@@ -17,6 +18,21 @@ module flipp.mentat {
       this._barsElement.innerHTML = '';
       this._barsElement.appendChild(
         createDocumentFragment(this._template({})));
+
+      this.HOVERABLE = true;
+
+      /**/
+      this.onhoverhtml = function(data) {
+        var html = "";
+        for (var i = 0; i < data.sets.length; i++) {
+          var set = data.sets[i]
+          html +=
+            "<strong style='color:" + set.color + "'>" + set.column + "</strong>" +
+            ": <span style='color:red'>" + Math.round((set.y1 - set.y0) * 100) / 100 +
+            "</span><br>";
+        }
+        return html;
+      }
 
       if (this.src) {
         this.load();
@@ -66,24 +82,33 @@ module flipp.mentat {
       if (this._data) {
         var data = d3.csv.parse(this._data);
 
-        // Different stacked bars are cols
-        var color = this.flatColor10().domain(this.cols);
+        // Different stacked bars are columnss
+        var color = this.flatColor10().domain(this.columns);
         // Buckets are defined by primary key
         data.forEach((d: any) => {
           var y0 = 0;
           d.bucket = d[this.key];
-          d.groups = color.domain().map(function(col) {
-            return { col: col, y0: y0, y1: y0 += +d[col] }; });
+          d.sets = color.domain().map(function(column) {
+            return {
+              column: column,
+              y0: y0,
+              y1: y0 += +d[column],
+              color: color(column)
+            };
+          });
           if (this.normalized) {
-            d.groups.forEach(function(d) { d.y0 /= y0; d.y1 /= y0; });
+            d.sets.forEach(function(d) {
+              d.y0 /= y0;
+              d.y1 /= y0;
+            });
           } else {
-            d.total = d.groups[d.groups.length - 1].y1;
+            d.total = d.sets[d.sets.length - 1].y1;
           }
         });
 
         data.sort((a: any, b: any) => {
           if (this.normalized) {
-            return b.groups[0].y1 - a.groups[0].y1;
+            return b.sets[0].y1 - a.sets[0].y1;
           } else {
             return b.total - a.total;
           }
@@ -103,26 +128,46 @@ module flipp.mentat {
           .attr("class", "y axis")
           .call(yAxis);
 
+        // Draw bars
         var bucket = svg.selectAll(".bucket")
           .data(data)
-          .enter().append("g")
+          .enter()
+          .append("g")
           .attr("class", "bucket")
           .attr("transform", (d: any) => {
-            return this.translate(x(d.bucket), 0) });
+            return this.translate(x(d.bucket), 0)
+          });
 
         bucket.selectAll("rect")
-          .data(function(d: any) { return d.groups; })
-          .enter().append("rect")
+          .data(function(d: any) { return d.sets; })
+          .enter()
+          .append("rect")
+          .attr("class", "set")
           .attr("width", x.rangeBand())
           .attr("y", function(d: any) { return y(d.y1); })
           .attr("height", function(d: any) { return y(d.y0) - y(d.y1); })
-          .style("fill", function(d: any) { return color(d.col); });
+          .style("fill", function(d: any) { return d.color });
+
+        // Hover functionality
+        if (this.hoverable) {
+          var tip = new Tooltip(svg)
+            .html((d: any) => {
+              return this.onhoverhtml(d);
+            })
+
+          // TODO position not quite right
+          bucket.on("mouseover", function(d) {
+            tip.show(d3.mouse(svg[0][0]), d);
+          }).on("mouseout", function() {
+            tip.hide()
+          });
+        }
       }
     }
   }
 
   export interface BarsElement extends GraphElement {
-    normalized: boolean
+    normalized: boolean;
   }
 
   export var BarsElement = registerElement('f-bars', HTMLElement, Bars);
