@@ -2,7 +2,7 @@
 HANDLEBARS := node_modules/.bin/handlebars
 SASS       := node_modules/.bin/node-sass
 TYPESCRIPT := node_modules/.bin/tsc
-UGLIFYJS   := node_modules/.bin/uglifyjs
+MINIFIER   := node_modules/.bin/html-minifier
 VULCANIZE  := node_modules/.bin/vulcanize
 SRC_PATH   := src
 LIB_PATH   := lib
@@ -41,6 +41,7 @@ release:
 	@make
 	@make f-mentat.html
 	@make f-mentat.min.html
+	@npm run pkg
 
 clean:
 	@rm -f $(LIB_PATH)/*
@@ -72,9 +73,10 @@ $(LIB_PATH)/f-mentat.js: src/f-mentat.ts
 
 f-mentat.html: $(OUTPUT_FILES)
 	@echo ">>> f-mentat.html"
-	@$(VULCANIZE) --output src/f-mentat.html --inline > f-mentat.html
+	@$(VULCANIZE) --output src/f-mentat.html --inline-scripts \
+								--inline-css > f-mentat.html
 
 f-mentat.min.html: $(OUTPUT_FILES)
 	@echo ">>> f-mentat.min.html"
-	@$(VULCANIZE) --strip --output src/f-mentat.html \
-								--inline-scripts --inline-css > f-mentat.min.html
+	@$(MINIFIER) --collapse-whitespace --lint --minify-js \
+							 --minify-css f-mentat.html > f-mentat.min.html

@@ -11,6 +11,6 @@ make release
 ez
 
 
-TODO
+CHANGELOG
 =====
-proper release packaging (minify!)
+Not even in production yet!

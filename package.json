@@ -3,15 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/watch"
+    "start": "node ./bin/watch",
+    "pkg": "node ./bin/package"
   },
   "dependencies": {
     "node-sass": "3.3.2",
     "typescript": "1.6.2",
     "vulcanize": "1.14.0",
     "handlebars": "3.0.3",
-    "uglify-js": "2.4.24",
+    "html-minifier": "*",
     "debug": "2.2.0",
-    "fsmonitor": "0.2.4"
+    "fsmonitor": "0.2.4",
+    "s3": "4.4.0"
   }
 }
