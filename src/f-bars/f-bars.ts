@@ -9,7 +9,6 @@ module flipp.mentat {
     }
 
     private _template = Handlebars.templates['f-bars'];
-    private _data: string;
 
     createdCallback() {
       if (!this._barsElement)
@@ -19,24 +18,26 @@ module flipp.mentat {
       this._barsElement.appendChild(
         createDocumentFragment(this._template({})));
 
-      this.HOVERABLE = true;
+      /* overwrite hoverable+sum default to true */
+      this.defaultHoverable = true;
 
       /**/
-      this.onhoverhtml = function(data) {
+      this.hover((d: any) => {
         var html = "";
-        for (var i = 0; i < data.sets.length; i++) {
-          var set = data.sets[i]
+        for (var i = 0; i < d.sets.length; i++) {
+          var set = d.sets[i]
           html +=
-            "<strong style='color:" + set.color + "'>" + set.column + "</strong>" +
-            ": <span style='color:red'>" + Math.round((set.y1 - set.y0) * 100) / 100 +
-            "</span><br>";
+            "<strong style='color:" + set.color + "'>"
+            + set.column + "</strong>" + ": <span style='color:red'>" +
+            Math.round((set.y1 - set.y0) * 100) / 100 + "</span><br>";
         }
         return html;
-      }
+      }).decode((d: any) => {
+        return d;
+      });
 
-      if (this.src) {
+      if (this.src)
         this.load();
-      }
     }
 
     get normalized(): boolean {
@@ -45,19 +46,6 @@ module flipp.mentat {
 
     set normalized(newNormalized: boolean) {
       this._barsElement.setAttribute('normalized', newNormalized.toString());
-    }
-
-    protected load() {
-      $.ajax({
-        url: this.src,
-        success: (data) => {
-          this._data = data;
-          this.render();
-        },
-        error: (error) => {
-          console.error("Error:" + error);
-        }
-      });
     }
 
     protected render() {
@@ -72,20 +60,23 @@ module flipp.mentat {
       var yAxis     = d3.svg.axis().scale(y).orient("left");
 
       var svg = d3.select(this._barsElement)
-        .append("svg")
-        .attr("width", this.width)
-        .attr("height", this.height)
-        .append("g")
-        .attr("transform", this.translate(
-          Graph.MARGIN.left, Graph.MARGIN.top));
+                  .append("svg")
+                  .attr("width", this.width)
+                  .attr("height", this.height)
+                  .append("g")
+                  .attr("transform", this.translate(
+                    Graph.MARGIN.left, Graph.MARGIN.top));
 
-      if (this._data) {
-        var data = d3.csv.parse(this._data);
-
-        // Different stacked bars are columnss
+      if (this.data) {
+        var data  = this.data.slice();
         var color = this.flatColor10().domain(this.columns);
+
+        // TODO this isn't up to par with lines
         // Buckets are defined by primary key
         data.forEach((d: any) => {
+          // data decoder
+          d = this.decodeData(d);
+
           var y0 = 0;
           d.bucket = d[this.key];
           d.sets = color.domain().map(function(column) {
@@ -151,9 +142,7 @@ module flipp.mentat {
         // Hover functionality
         if (this.hoverable) {
           var tip = new Tooltip(svg)
-            .html((d: any) => {
-              return this.onhoverhtml(d);
-            })
+            .html((d: any) => { return this.hoverHtml(d); })
 
           // TODO position not quite right
           bucket.on("mouseover", function(d) {

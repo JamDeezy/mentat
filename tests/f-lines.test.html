@@ -23,8 +23,16 @@
     height  = "400"
     src     = "time_data3.csv"
     key     = "date"
-    columns = "New York,San Francisco,Austin">
+    columns = "San Francisco">
   </f-lines>
 </div>
 </body>
+<script>
+  var lines = document.querySelector('f-lines');
+  lines.hover(function(d) {
+    return "fuck you";
+  }).decode(function(d) {
+    return d;
+  })
+</script>
 </html>

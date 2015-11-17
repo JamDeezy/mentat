@@ -9,7 +9,6 @@ module flipp.mentat {
     }
 
     private _template = Handlebars.templates['f-lines'];
-    private _data: string;
 
     createdCallback() {
       if (!this._linesElement)
@@ -20,12 +19,11 @@ module flipp.mentat {
         createDocumentFragment(this._template({})));
 
       /* overwrite hoverable+sum default to true */
-      this.HOVERABLE = true;
-      this.SUM = true;
+      this.defaultHoverable = true;
+      this.defaultSum = true;
 
       /* default hover content */
-      this.onhoverhtml = (d: any) => {
-        // TODO behavior between sum and no sum
+      this.hover((d: any) => {
         var html = "<h4>" + moment(d.data.date).format("MMM Do YY") + "</h4>";
         for (var i = 0; i < this.columns.length; i++) {
           var data = d.data[this.columns[i]]
@@ -33,24 +31,13 @@ module flipp.mentat {
             "<span style='color:red'>" + data + "</span><br>";
         }
         return html;
-      };
+      }).decode((d: any) => {
+        d.date = d3.time.format("%Y-%m-%d").parse(d[this.key]);
+        return d;
+      })
 
-      if (this.src) {
+      if (this.src)
         this.load();
-      }
-    }
-
-    protected load() {
-      $.ajax({
-        url: this.src,
-        success: (data) => {
-          this._data = data;
-          this.render();
-        },
-        error: (error) => {
-          console.error("Error:" + error);
-        }
-      });
     }
 
     protected render() {
@@ -69,24 +56,23 @@ module flipp.mentat {
                         .y(function(d: any) { return y(d.value); });
 
       var svg = d3.select(this._linesElement)
-        .append("svg")
-        .attr("width", this.width)
-        .attr("height", this.height)
-        .append("g")
-        .attr("transform", this.translate(
-          Graph.MARGIN.left, Graph.MARGIN.top));
+                  .append("svg")
+                  .attr("width", this.width)
+                  .attr("height", this.height)
+                  .append("g")
+                  .attr("transform",
+                    this.translate(Graph.MARGIN.left, Graph.MARGIN.top));
 
-      if (this._data) {
-        var data = d3.csv.parse(this._data)
+      if (this.data) {
+        var data  = this.data.slice();
         var color = this.flatColor10().domain(
           (this.sum) ? ["sum"] : this.columns);
 
-        // For line graphs, our key is a time scale (y over time)
-        // Parse time to a javascript acceptable time
-        data.forEach((d: any) => {
-          d.date = d3.time.format("%Y%m%d").parse(d[this.key]);
-        });
+        // Let decode our data
+        data.forEach((d: any) => { d = this.decodeData(d); });
 
+        // if we're summing, add all columns together under sum key
+        // otherwise each column has a key to its value
         var sets: any = color.domain().map((column) => {
           return {
             column: (this.sum) ? "sum" : column,
@@ -94,9 +80,9 @@ module flipp.mentat {
               if (this.sum) {
                 var sum = 0, i = 0;
                 for (;i < this.columns.length; sum += +d[this.columns[i++]]);
-                return { date: d.date, value: sum, data: d };
+                return { date: d.date, value: sum, source: d };
               } else {
-                return { date: d.date, value: +d[column] };
+                return { date: d.date, value: +d[column], source: d };
               }
             })
           }
@@ -109,24 +95,24 @@ module flipp.mentat {
         ]);
 
         svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", this.translate(0, height))
-          .call(xAxis);
+           .attr("class", "x axis")
+           .attr("transform", this.translate(0, height))
+           .call(xAxis);
 
         svg.append("g")
-          .attr("class", "y axis")
-          .call(yAxis);
+           .attr("class", "y axis")
+           .call(yAxis);
 
         var set = svg.selectAll(".set")
-          .data(sets)
-          .enter()
-          .append("g")
-          .attr("class", "set");
+                     .data(sets)
+                     .enter()
+                     .append("g")
+                     .attr("class", "set");
 
         set.append("path")
-          .attr("class", "line")
-          .attr("d", (d: any) => { return line(d.values); })
-          .style("stroke", (d: any) => { return color(d.column); });
+           .attr("class", "line")
+           .attr("d", (d: any) => { return line(d.values); })
+           .style("stroke", (d: any) => { return color(d.column); });
 
         if (this.hoverable) {
           var scanner = svg.append("g")
@@ -143,9 +129,7 @@ module flipp.mentat {
 
           var tip = new Tooltip(svg)
             .offset([5, 0])
-            .html((d: any) => {
-              return this.onhoverhtml(d);
-            })
+            .html((d: any) => { return this.hoverHtml(d.source); })
 
           svg.append("rect")
             .attr("class", "overlay")

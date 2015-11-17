@@ -9639,6 +9639,336 @@ table {
   });
   if (typeof define === "function" && define.amd) define(this.d3 = d3); else if (typeof module === "object" && module.exports) module.exports = d3; else this.d3 = d3;
 }();
+</script>
+<script>
+// d3.tip
+// Copyright (c) 2013 Justin Palmer
+//
+// Tooltips for d3.js SVG visualizations
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module with d3 as a dependency.
+    define(['d3'], factory)
+  } else if (typeof module === 'object' && module.exports) {
+    // CommonJS
+    module.exports = function(d3) {
+      d3.tip = factory(d3)
+      return d3.tip
+    }
+  } else {
+    // Browser global.
+    root.d3.tip = factory(root.d3)
+  }
+}(this, function (d3) {
+
+  // Public - contructs a new tooltip
+  //
+  // Returns a tip
+  return function() {
+    var direction = d3_tip_direction,
+        offset    = d3_tip_offset,
+        html      = d3_tip_html,
+        node      = initNode(),
+        svg       = null,
+        point     = null,
+        target    = null
+
+    function tip(vis) {
+      svg = getSVGNode(vis)
+      point = svg.createSVGPoint()
+      document.body.appendChild(node)
+    }
+
+    tip.showAt = function() {
+    }
+
+    // Public - show the tooltip on the screen
+    //
+    // Returns a tip
+    tip.show = function() {
+      var args = Array.prototype.slice.call(arguments)
+      if(args[args.length - 1] instanceof SVGElement) target = args.pop()
+
+      var content = html.apply(this, args),
+          poffset = offset.apply(this, args),
+          dir     = direction.apply(this, args),
+          nodel   = getNodeEl(),
+          i       = directions.length,
+          coords,
+          scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
+          scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+      nodel.html(content)
+        .style({ opacity: 1, 'pointer-events': 'all' })
+
+      while(i--) nodel.classed(directions[i], false)
+      coords = direction_callbacks.get(dir).apply(this)
+      debugger;
+
+      nodel.classed(dir, true).style({
+        top: (coords.top +  poffset[0]) + scrollTop + 'px',
+        left: (coords.left + poffset[1]) + scrollLeft + 'px'
+      })
+
+      return tip
+    }
+
+    // Public - hide the tooltip
+    //
+    // Returns a tip
+    tip.hide = function() {
+      var nodel = getNodeEl()
+      nodel.style({ opacity: 0, 'pointer-events': 'none' })
+      return tip
+    }
+
+    // Public: Proxy attr calls to the d3 tip container.  Sets or gets attribute value.
+    //
+    // n - name of the attribute
+    // v - value of the attribute
+    //
+    // Returns tip or attribute value
+    tip.attr = function(n, v) {
+      if (arguments.length < 2 && typeof n === 'string') {
+        return getNodeEl().attr(n)
+      } else {
+        var args =  Array.prototype.slice.call(arguments)
+        d3.selection.prototype.attr.apply(getNodeEl(), args)
+      }
+
+      return tip
+    }
+
+    // Public: Proxy style calls to the d3 tip container.  Sets or gets a style value.
+    //
+    // n - name of the property
+    // v - value of the property
+    //
+    // Returns tip or style property value
+    tip.style = function(n, v) {
+      if (arguments.length < 2 && typeof n === 'string') {
+        return getNodeEl().style(n)
+      } else {
+        var args =  Array.prototype.slice.call(arguments)
+        d3.selection.prototype.style.apply(getNodeEl(), args)
+      }
+
+      return tip
+    }
+
+    // Public: Set or get the direction of the tooltip
+    //
+    // v - One of n(north), s(south), e(east), or w(west), nw(northwest),
+    //     sw(southwest), ne(northeast) or se(southeast)
+    //
+    // Returns tip or direction
+    tip.direction = function(v) {
+      if (!arguments.length) return direction
+      direction = v == null ? v : d3.functor(v)
+
+      return tip
+    }
+
+    // Public: Sets or gets the offset of the tip
+    //
+    // v - Array of [x, y] offset
+    //
+    // Returns offset or
+    tip.offset = function(v) {
+      if (!arguments.length) return offset
+      offset = v == null ? v : d3.functor(v)
+
+      return tip
+    }
+
+    // Public: sets or gets the html value of the tooltip
+    //
+    // v - String value of the tip
+    //
+    // Returns html value or tip
+    tip.html = function(v) {
+      if (!arguments.length) return html
+      html = v == null ? v : d3.functor(v)
+
+      return tip
+    }
+
+    // Public: destroys the tooltip and removes it from the DOM
+    //
+    // Returns a tip
+    tip.destroy = function() {
+      if(node) {
+        getNodeEl().remove();
+        node = null;
+      }
+      return tip;
+    }
+
+    function d3_tip_direction() { return 'n' }
+    function d3_tip_offset() { return [0, 0] }
+    function d3_tip_html() { return ' ' }
+
+    var direction_callbacks = d3.map({
+      n:  direction_n,
+      s:  direction_s,
+      e:  direction_e,
+      w:  direction_w,
+      nw: direction_nw,
+      ne: direction_ne,
+      sw: direction_sw,
+      se: direction_se
+    }),
+
+    directions = direction_callbacks.keys()
+
+    function direction_n() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.n.y - node.offsetHeight,
+        left: bbox.n.x - node.offsetWidth / 2
+      }
+    }
+
+    function direction_s() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.s.y,
+        left: bbox.s.x - node.offsetWidth / 2
+      }
+    }
+
+    function direction_e() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.e.y - node.offsetHeight / 2,
+        left: bbox.e.x
+      }
+    }
+
+    function direction_w() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.w.y - node.offsetHeight / 2,
+        left: bbox.w.x - node.offsetWidth
+      }
+    }
+
+    function direction_nw() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.nw.y - node.offsetHeight,
+        left: bbox.nw.x - node.offsetWidth
+      }
+    }
+
+    function direction_ne() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.ne.y - node.offsetHeight,
+        left: bbox.ne.x
+      }
+    }
+
+    function direction_sw() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.sw.y,
+        left: bbox.sw.x - node.offsetWidth
+      }
+    }
+
+    function direction_se() {
+      var bbox = getScreenBBox()
+      return {
+        top:  bbox.se.y,
+        left: bbox.e.x
+      }
+    }
+
+    function initNode() {
+      var node = d3.select(document.createElement('div'))
+      node.style({
+        position: 'absolute',
+        top: 0,
+        opacity: 0,
+        'pointer-events': 'none',
+        'box-sizing': 'border-box'
+      })
+
+      return node.node()
+    }
+
+    function getSVGNode(el) {
+      el = el.node()
+      if(el.tagName.toLowerCase() === 'svg')
+        return el
+
+      return el.ownerSVGElement
+    }
+
+    function getNodeEl() {
+      if(node === null) {
+        node = initNode();
+        // re-add node to DOM
+        document.body.appendChild(node);
+      };
+      return d3.select(node);
+    }
+
+    // Private - gets the screen coordinates of a shape
+    //
+    // Given a shape on the screen, will return an SVGPoint for the directions
+    // n(north), s(south), e(east), w(west), ne(northeast), se(southeast), nw(northwest),
+    // sw(southwest).
+    //
+    //    +-+-+
+    //    |   |
+    //    +   +
+    //    |   |
+    //    +-+-+
+    //
+    // Returns an Object {n, s, e, w, nw, sw, ne, se}
+    function getScreenBBox() {
+      var targetel   = target || d3.event.target;
+
+      while ('undefined' === typeof targetel.getScreenCTM && 'undefined' === targetel.parentNode) {
+          targetel = targetel.parentNode;
+      }
+
+      var bbox       = {},
+          matrix     = targetel.getScreenCTM(),
+          tbbox      = targetel.getBBox(),
+          width      = tbbox.width,
+          height     = tbbox.height,
+          x          = tbbox.x,
+          y          = tbbox.y
+
+      point.x = x
+      point.y = y
+      bbox.nw = point.matrixTransform(matrix)
+      point.x += width
+      bbox.ne = point.matrixTransform(matrix)
+      point.y += height
+      bbox.se = point.matrixTransform(matrix)
+      point.x -= width
+      bbox.sw = point.matrixTransform(matrix)
+      point.y -= height / 2
+      bbox.w  = point.matrixTransform(matrix)
+      point.x += width
+      bbox.e = point.matrixTransform(matrix)
+      point.x -= width / 2
+      point.y -= height / 2
+      bbox.n = point.matrixTransform(matrix)
+      point.y += height
+      bbox.s = point.matrixTransform(matrix)
+
+      return bbox
+    }
+
+    return tip
+  };
+
+}));
 </script><script>
   //! moment.js
 //! version : 2.10.6
@@ -9732,23 +10062,14 @@ var flipp;
         var Graph = (function () {
             function Graph(_element) {
                 this._element = _element;
+                this.defaultHoverable = false;
+                this.defaultSum = false;
                 this._skipCallback = false;
-                /************ SETTINGS ************/
-                this.HOVERABLE = false;
-                this.SUM = false;
             }
-            Graph.prototype.attributeChangedCallback = function (attr, old, value) {
-                if (!this._skipCallback) {
-                    if (attr == 'src') {
-                        this.load();
-                    }
-                    else {
-                        this.render();
-                    }
-                }
-            };
             Object.defineProperty(Graph.prototype, "width", {
-                /************ Attributes ************/
+                /**
+                 * Attributes
+                 */
                 get: function () {
                     var width = this._element.getAttribute('width');
                     return parseInt(width) || Graph.DIMENSIONS.width;
@@ -9819,7 +10140,7 @@ var flipp;
             Object.defineProperty(Graph.prototype, "hoverable", {
                 get: function () {
                     var hoverable = this._element.getAttribute('hoverable');
-                    return (hoverable) ? hoverable === 'true' : this.HOVERABLE;
+                    return (hoverable) ? hoverable === 'true' : this.defaultHoverable;
                 },
                 set: function (newHoverable) {
                     this._element.setAttribute('hoverable', newHoverable.toString());
@@ -9830,7 +10151,7 @@ var flipp;
             Object.defineProperty(Graph.prototype, "sum", {
                 get: function () {
                     var sum = this._element.getAttribute('sum');
-                    return (sum) ? sum === 'true' : this.SUM;
+                    return (sum) ? sum === 'true' : this.defaultSum;
                 },
                 set: function (newSum) {
                     this._element.setAttribute('sum', newSum.toString());
@@ -9838,9 +10159,44 @@ var flipp;
                 enumerable: true,
                 configurable: true
             });
-            /************ Helpers ************/
+            Graph.prototype.attributeChangedCallback = function (attr, old, value) {
+                if (!this._skipCallback) {
+                    if (attr == 'src') {
+                        this.load();
+                    }
+                    else {
+                        this.render();
+                    }
+                }
+            };
+            /**
+             * Helpers
+             */
             Graph.prototype.translate = function (x, y) {
                 return "translate(" + x + "," + y + ")";
+            };
+            Graph.prototype.get = function (url) {
+                return new Promise(function (resolve, reject) {
+                    $.ajax({
+                        url: url,
+                        complete: function (response) {
+                            if (response.responseJSON)
+                                resolve(response.responseJSON);
+                            else if (response.responseText)
+                                resolve(response.responseText);
+                            else
+                                console.error("Bad response!");
+                        },
+                        error: function (error) {
+                            reject(error);
+                        }
+                    });
+                });
+            };
+            Graph.prototype.skipCallback = function (block) {
+                this._skipCallback = true;
+                block();
+                this._skipCallback = false;
             };
             Graph.prototype.flatColor10 = function () {
                 return d3.scale.ordinal().range(Graph.FLATPALLET);
@@ -9848,22 +10204,69 @@ var flipp;
             Graph.prototype.materialColor20 = function () {
                 return d3.scale.ordinal().range(Graph.MATERIALPALLET);
             };
+            Graph.prototype.hover = function (h) {
+                this.hoverHtml = h;
+                return this._element;
+            };
+            Graph.prototype.decode = function (d) {
+                this.decodeData = d;
+                return this._element;
+            };
             Graph.prototype.update = function (hash) {
-                // Turn off callback for update
-                this._skipCallback = true;
-                for (var key in hash) {
-                    this._element.setAttribute(key, hash[key]);
+                var _this = this;
+                this.skipCallback(function () {
+                    for (var key in hash) {
+                        _this._element.setAttribute(key, hash[key]);
+                    }
+                    // if source was changed, load
+                    if (Object.keys(hash).indexOf('src') >= 0) {
+                        _this.load();
+                    }
+                    else {
+                        _this.render();
+                    }
+                });
+                return this._element;
+            };
+            Graph.prototype.load = function (param) {
+                var _this = this;
+                // default is load from this.Src
+                if (typeof param === 'undefined') {
+                    this.get(this.src).then(function (d) {
+                        if (typeof d === 'string') {
+                            _this.data = d3.csv.parse(d);
+                        }
+                        else {
+                            _this.data = d;
+                        }
+                        _this.render();
+                    });
                 }
-                // if source was changed, load
-                if (Object.keys(hash).indexOf('src') >= 0) {
-                    this.load();
+                else if (typeof param === 'string') {
+                    if (/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/.test(param)) {
+                        this.get(param).then(function (d) {
+                            _this.data = d3.csv.parse(d);
+                            _this.skipCallback(function () { _this.src = param; });
+                            _this.render();
+                        });
+                    }
+                    else {
+                        this.data = d3.csv.parse(param);
+                        this.render();
+                    }
                 }
-                else {
+                else if (typeof param === 'object') {
+                    this.data = param;
                     this.render();
                 }
-                this._skipCallback = false;
+                else {
+                    console.error("Invalid data type!");
+                }
+                return this._element;
             };
-            /************ CONSTANTS ************/
+            /**
+             * CONSTANTS
+             */
             Graph.MARGIN = {
                 top: 20, right: 100, bottom: 30, left: 50
             };
@@ -9967,22 +10370,24 @@ var flipp;
                     Bars.call(this, this);
                 this._barsElement.innerHTML = '';
                 this._barsElement.appendChild(mentat.createDocumentFragment(this._template({})));
-                this.HOVERABLE = true;
+                /* overwrite hoverable+sum default to true */
+                this.defaultHoverable = true;
                 /**/
-                this.onhoverhtml = function (data) {
+                this.hover(function (d) {
                     var html = "";
-                    for (var i = 0; i < data.sets.length; i++) {
-                        var set = data.sets[i];
+                    for (var i = 0; i < d.sets.length; i++) {
+                        var set = d.sets[i];
                         html +=
-                            "<strong style='color:" + set.color + "'>" + set.column + "</strong>" +
-                                ": <span style='color:red'>" + Math.round((set.y1 - set.y0) * 100) / 100 +
-                                "</span><br>";
+                            "<strong style='color:" + set.color + "'>"
+                                + set.column + "</strong>" + ": <span style='color:red'>" +
+                                Math.round((set.y1 - set.y0) * 100) / 100 + "</span><br>";
                     }
                     return html;
-                };
-                if (this.src) {
+                }).decode(function (d) {
+                    return d;
+                });
+                if (this.src)
                     this.load();
-                }
             };
             Object.defineProperty(Bars.prototype, "normalized", {
                 get: function () {
@@ -9994,19 +10399,6 @@ var flipp;
                 enumerable: true,
                 configurable: true
             });
-            Bars.prototype.load = function () {
-                var _this = this;
-                $.ajax({
-                    url: this.src,
-                    success: function (data) {
-                        _this._data = data;
-                        _this.render();
-                    },
-                    error: function (error) {
-                        console.error("Error:" + error);
-                    }
-                });
-            };
             Bars.prototype.render = function () {
                 var _this = this;
                 // Render cycles should be independent of each other
@@ -10023,12 +10415,14 @@ var flipp;
                     .attr("height", this.height)
                     .append("g")
                     .attr("transform", this.translate(mentat.Graph.MARGIN.left, mentat.Graph.MARGIN.top));
-                if (this._data) {
-                    var data = d3.csv.parse(this._data);
-                    // Different stacked bars are columnss
+                if (this.data) {
+                    var data = this.data.slice();
                     var color = this.flatColor10().domain(this.columns);
+                    // TODO this isn't up to par with lines
                     // Buckets are defined by primary key
                     data.forEach(function (d) {
+                        // data decoder
+                        d = _this.decodeData(d);
                         var y0 = 0;
                         d.bucket = d[_this.key];
                         d.sets = color.domain().map(function (column) {
@@ -10089,9 +10483,7 @@ var flipp;
                     // Hover functionality
                     if (this.hoverable) {
                         var tip = new mentat.Tooltip(svg)
-                            .html(function (d) {
-                            return _this.onhoverhtml(d);
-                        });
+                            .html(function (d) { return _this.hoverHtml(d); });
                         // TODO position not quite right
                         bucket.on("mouseover", function (d) {
                             tip.show(d3.mouse(svg[0][0]), d);
@@ -10192,23 +10584,14 @@ var flipp;
         var Graph = (function () {
             function Graph(_element) {
                 this._element = _element;
+                this.defaultHoverable = false;
+                this.defaultSum = false;
                 this._skipCallback = false;
-                /************ SETTINGS ************/
-                this.HOVERABLE = false;
-                this.SUM = false;
             }
-            Graph.prototype.attributeChangedCallback = function (attr, old, value) {
-                if (!this._skipCallback) {
-                    if (attr == 'src') {
-                        this.load();
-                    }
-                    else {
-                        this.render();
-                    }
-                }
-            };
             Object.defineProperty(Graph.prototype, "width", {
-                /************ Attributes ************/
+                /**
+                 * Attributes
+                 */
                 get: function () {
                     var width = this._element.getAttribute('width');
                     return parseInt(width) || Graph.DIMENSIONS.width;
@@ -10279,7 +10662,7 @@ var flipp;
             Object.defineProperty(Graph.prototype, "hoverable", {
                 get: function () {
                     var hoverable = this._element.getAttribute('hoverable');
-                    return (hoverable) ? hoverable === 'true' : this.HOVERABLE;
+                    return (hoverable) ? hoverable === 'true' : this.defaultHoverable;
                 },
                 set: function (newHoverable) {
                     this._element.setAttribute('hoverable', newHoverable.toString());
@@ -10290,7 +10673,7 @@ var flipp;
             Object.defineProperty(Graph.prototype, "sum", {
                 get: function () {
                     var sum = this._element.getAttribute('sum');
-                    return (sum) ? sum === 'true' : this.SUM;
+                    return (sum) ? sum === 'true' : this.defaultSum;
                 },
                 set: function (newSum) {
                     this._element.setAttribute('sum', newSum.toString());
@@ -10298,9 +10681,44 @@ var flipp;
                 enumerable: true,
                 configurable: true
             });
-            /************ Helpers ************/
+            Graph.prototype.attributeChangedCallback = function (attr, old, value) {
+                if (!this._skipCallback) {
+                    if (attr == 'src') {
+                        this.load();
+                    }
+                    else {
+                        this.render();
+                    }
+                }
+            };
+            /**
+             * Helpers
+             */
             Graph.prototype.translate = function (x, y) {
                 return "translate(" + x + "," + y + ")";
+            };
+            Graph.prototype.get = function (url) {
+                return new Promise(function (resolve, reject) {
+                    $.ajax({
+                        url: url,
+                        complete: function (response) {
+                            if (response.responseJSON)
+                                resolve(response.responseJSON);
+                            else if (response.responseText)
+                                resolve(response.responseText);
+                            else
+                                console.error("Bad response!");
+                        },
+                        error: function (error) {
+                            reject(error);
+                        }
+                    });
+                });
+            };
+            Graph.prototype.skipCallback = function (block) {
+                this._skipCallback = true;
+                block();
+                this._skipCallback = false;
             };
             Graph.prototype.flatColor10 = function () {
                 return d3.scale.ordinal().range(Graph.FLATPALLET);
@@ -10308,22 +10726,69 @@ var flipp;
             Graph.prototype.materialColor20 = function () {
                 return d3.scale.ordinal().range(Graph.MATERIALPALLET);
             };
+            Graph.prototype.hover = function (h) {
+                this.hoverHtml = h;
+                return this._element;
+            };
+            Graph.prototype.decode = function (d) {
+                this.decodeData = d;
+                return this._element;
+            };
             Graph.prototype.update = function (hash) {
-                // Turn off callback for update
-                this._skipCallback = true;
-                for (var key in hash) {
-                    this._element.setAttribute(key, hash[key]);
+                var _this = this;
+                this.skipCallback(function () {
+                    for (var key in hash) {
+                        _this._element.setAttribute(key, hash[key]);
+                    }
+                    // if source was changed, load
+                    if (Object.keys(hash).indexOf('src') >= 0) {
+                        _this.load();
+                    }
+                    else {
+                        _this.render();
+                    }
+                });
+                return this._element;
+            };
+            Graph.prototype.load = function (param) {
+                var _this = this;
+                // default is load from this.Src
+                if (typeof param === 'undefined') {
+                    this.get(this.src).then(function (d) {
+                        if (typeof d === 'string') {
+                            _this.data = d3.csv.parse(d);
+                        }
+                        else {
+                            _this.data = d;
+                        }
+                        _this.render();
+                    });
                 }
-                // if source was changed, load
-                if (Object.keys(hash).indexOf('src') >= 0) {
-                    this.load();
+                else if (typeof param === 'string') {
+                    if (/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/.test(param)) {
+                        this.get(param).then(function (d) {
+                            _this.data = d3.csv.parse(d);
+                            _this.skipCallback(function () { _this.src = param; });
+                            _this.render();
+                        });
+                    }
+                    else {
+                        this.data = d3.csv.parse(param);
+                        this.render();
+                    }
                 }
-                else {
+                else if (typeof param === 'object') {
+                    this.data = param;
                     this.render();
                 }
-                this._skipCallback = false;
+                else {
+                    console.error("Invalid data type!");
+                }
+                return this._element;
             };
-            /************ CONSTANTS ************/
+            /**
+             * CONSTANTS
+             */
             Graph.MARGIN = {
                 top: 20, right: 100, bottom: 30, left: 50
             };
@@ -10429,11 +10894,10 @@ var flipp;
                 this._linesElement.innerHTML = '';
                 this._linesElement.appendChild(mentat.createDocumentFragment(this._template({})));
                 /* overwrite hoverable+sum default to true */
-                this.HOVERABLE = true;
-                this.SUM = true;
+                this.defaultHoverable = true;
+                this.defaultSum = true;
                 /* default hover content */
-                this.onhoverhtml = function (d) {
-                    // TODO behavior between sum and no sum
+                this.hover(function (d) {
                     var html = "<h4>" + moment(d.data.date).format("MMM Do YY") + "</h4>";
                     for (var i = 0; i < _this.columns.length; i++) {
                         var data = d.data[_this.columns[i]];
@@ -10441,23 +10905,12 @@ var flipp;
                             "<span style='color:red'>" + data + "</span><br>";
                     }
                     return html;
-                };
-                if (this.src) {
-                    this.load();
-                }
-            };
-            Lines.prototype.load = function () {
-                var _this = this;
-                $.ajax({
-                    url: this.src,
-                    success: function (data) {
-                        _this._data = data;
-                        _this.render();
-                    },
-                    error: function (error) {
-                        console.error("Error:" + error);
-                    }
+                }).decode(function (d) {
+                    d.date = d3.time.format("%Y-%m-%d").parse(d[_this.key]);
+                    return d;
                 });
+                if (this.src)
+                    this.load();
             };
             Lines.prototype.render = function () {
                 var _this = this;
@@ -10479,14 +10932,13 @@ var flipp;
                     .attr("height", this.height)
                     .append("g")
                     .attr("transform", this.translate(mentat.Graph.MARGIN.left, mentat.Graph.MARGIN.top));
-                if (this._data) {
-                    var data = d3.csv.parse(this._data);
+                if (this.data) {
+                    var data = this.data.slice();
                     var color = this.flatColor10().domain((this.sum) ? ["sum"] : this.columns);
-                    // For line graphs, our key is a time scale (y over time)
-                    // Parse time to a javascript acceptable time
-                    data.forEach(function (d) {
-                        d.date = d3.time.format("%Y%m%d").parse(d[_this.key]);
-                    });
+                    // Let decode our data
+                    data.forEach(function (d) { d = _this.decodeData(d); });
+                    // if we're summing, add all columns together under sum key
+                    // otherwise each column has a key to its value
                     var sets = color.domain().map(function (column) {
                         return {
                             column: (_this.sum) ? "sum" : column,
@@ -10495,10 +10947,10 @@ var flipp;
                                     var sum = 0, i = 0;
                                     for (; i < _this.columns.length; sum += +d[_this.columns[i++]])
                                         ;
-                                    return { date: d.date, value: sum, data: d };
+                                    return { date: d.date, value: sum, source: d };
                                 }
                                 else {
-                                    return { date: d.date, value: +d[column] };
+                                    return { date: d.date, value: +d[column], source: d };
                                 }
                             })
                         };
@@ -10538,9 +10990,7 @@ var flipp;
                             .attr("r", 4);
                         var tip = new mentat.Tooltip(svg)
                             .offset([5, 0])
-                            .html(function (d) {
-                            return _this.onhoverhtml(d);
-                        });
+                            .html(function (d) { return _this.hoverHtml(d.source); });
                         svg.append("rect")
                             .attr("class", "overlay")
                             .attr("width", width)
