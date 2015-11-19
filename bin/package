@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 var s3 = require('s3');
+var pkg = require('../package.json');
 var bucket = "f.wishabi.ca";
-var keyPath = "development_ezdz";
+var keyPath = "development_ezdz/mentat/" + pkg.version;
 
 var client = s3.createClient({
   s3Options: {
@@ -33,8 +34,10 @@ for (var i = 0; i < paramsArr.length; i++) {
       console.error("unable to upload:", err.stack);
     })
     .on('progress', function() {
-      console.log("progress", uploader.progressMd5Amount,
-        uploader.progressAmount, uploader.progressTotal);
+      console.log("progress",
+        uploader.progressMd5Amount,
+        uploader.progressAmount,
+        uploader.progressTotal);
     })
     .on('end', function() {
       console.log("done uploading");

@@ -1,8 +1,12 @@
-f-lines {
+f-bar-graph {
   display: block;
   font: 10px sans-serif;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+
+  svg {
+    overflow: visible !important;
+  }
 
   .axis path,
   .axis line {
@@ -11,21 +15,7 @@ f-lines {
     shape-rendering: crispEdges;
   }
 
-  .line {
-    fill: none;
-    stroke-width: 3px;
-  }
-
-  .y-axis .tick {
-    opacity: 0.7;
-  }
-
   .axis path {
     display: none;
-  }
-
-  .scanner line {
-    stroke-dasharray: 3 3;
-    stroke: black;
   }
 }

@@ -1,17 +1,14 @@
-/// <reference path="dts/d3.d.ts"/>
 /// <reference path="dts/handlebars.d.ts"/>
-/// <reference path="dts/jquery.d.ts"/>
-/// <reference path="dts/moment.d.ts"/>
 /// <reference path="dts/webcomponents.d.ts"/>
+/// <reference path="dts/d3.d.ts"/>
+/// <reference path="dts/moment.d.ts"/>
 /// <reference path="dts/velocity.d.ts"/>
 
 module flipp.mentat {
-  function getPropertyDescriptor(obj: Object, prop: string):
-      PropertyDescriptor {
+  function getPropertyDesc(obj: Object, prop: string): PropertyDescriptor {
     for (var proto = obj; proto ; proto = Object.getPrototypeOf(proto)) {
       var desc = Object.getOwnPropertyDescriptor(proto, prop);
-      if (desc)
-        return desc;
+      if (desc) return desc;
     }
     return undefined;
   }
@@ -29,10 +26,10 @@ module flipp.mentat {
 
   function getFullPrototype(proto: Object): PropertyDescriptorMap {
     return getProperties(proto).reduce(
-        (map: PropertyDescriptorMap, prop: string) => {
-          map[prop] = getPropertyDescriptor(proto, prop);
-          return map;
-        }, <PropertyDescriptorMap>{}
+      (map: PropertyDescriptorMap, prop: string) => {
+        map[prop] = getPropertyDesc(proto, prop);
+        return map;
+      }, <PropertyDescriptorMap>{}
     );
   }
 
@@ -40,7 +37,10 @@ module flipp.mentat {
     el: Function, elExtend?: string): void {
     if (!registered(elName)) {
       var options: webcomponents.CustomElementInit = {
-        prototype: Object.create(elBase.prototype, getFullPrototype(el.prototype))
+        prototype: Object.create(
+          elBase.prototype,
+          getFullPrototype(el.prototype)
+        )
       };
       if (elExtend)
         options.extends = elExtend;
@@ -60,7 +60,8 @@ module flipp.mentat {
     return document.createRange().createContextualFragment(html);
   }
 
-  export function getChild(parent: HTMLElement, selector: string): JQuery {
-    return $(parent).find(selector);
+  /* TODO: May want to split these helpers into another module */
+  export function getChild(parent: HTMLElement, selector: string): any {
+    return parent.querySelector(selector);
   }
 }
