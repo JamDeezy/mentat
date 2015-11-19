@@ -9,6 +9,7 @@ module flipp.mentat {
     }
 
     private _template = Handlebars.templates['f-bars'];
+    private _tip: Tooltip;
 
     createdCallback() {
       if (!this._barsElement)
@@ -141,14 +142,17 @@ module flipp.mentat {
 
         // Hover functionality
         if (this.hoverable) {
-          var tip = new Tooltip(svg)
-            .html((d: any) => { return this.hoverHtml(d); })
+          if (this._tip) {
+            this._tip.remove();
+            this._tip = new Tooltip(svg)
+              .html((d: any) => { return this.hoverHtml(d); })
+          }
 
           // TODO position not quite right
-          bucket.on("mouseover", function(d) {
-            tip.show(d3.mouse(svg[0][0]), d);
-          }).on("mouseout", function() {
-            tip.hide()
+          bucket.on("mouseover", (d) => {
+            this._tip.show(d3.mouse(svg[0][0]), d);
+          }).on("mouseout", () => {
+            this._tip.hide()
           });
         }
       }

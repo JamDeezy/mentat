@@ -23,7 +23,7 @@
     height  = "400"
     src     = "time_data3.csv"
     key     = "date"
-    columns = "San Francisco">
+    columns = "New York">
   </f-lines>
 </div>
 </body>
@@ -32,7 +32,8 @@
   lines.hover(function(d) {
     return "fuck you";
   }).decode(function(d) {
+    d.date = d3.time.format("%Y%m%d").parse(d[this.key]);
     return d;
-  })
+  });
 </script>
 </html>

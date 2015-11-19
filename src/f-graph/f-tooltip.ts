@@ -17,22 +17,18 @@ module flipp.mentat {
     }
 
     public show(v, d): Tooltip {
-      if (!(this._position[0] === v[0] || this._position[1] === v[1])) {
+      this._node.innerHTML = this._html(d);
+      if (!(this._position[0] === v[0] && this._position[1] === v[1])) {
         this._position = v;
-        this._node.innerHTML = this._html(d);
-        var offset = $(this._parent[0][0]).offset();
-        var dimensions = [this._node.offsetWidth, this._node.offsetHeight];
-        this._node.style.display = 'block';
-        this._node.style.left = (v[0] + this._offset[0] +
-          offset.left + 30) + 'px'
-        this._node.style.top = (v[1] + this._offset[1] +
-          offset.top - dimensions[1] / 2) + 'px';
+        this._node.style.left = (v[0] + this._offset[0]) + 'px'
+        this._node.style.top = (v[1] + this._offset[1]) + 'px';
+        this._node.style.opacity = '1';
       }
       return this;
     }
 
     public hide(): Tooltip {
-      this._node.style.display = 'none';
+      this._node.style.opacity = '0';
       return this;
     }
 
@@ -46,6 +42,11 @@ module flipp.mentat {
       return this;
     }
 
+    public remove() {
+      this._node.parentElement.removeChild(this._node);
+      return this;
+    }
+
     // TODO
     public direction(v): Tooltip {
       this._direction = v;
@@ -55,6 +56,7 @@ module flipp.mentat {
     private _appendTooltipNode(): void {
       this._node = document.createElement('div');
       this._node.className = 'tooltip';
+      this._node.style.opacity = '0';
 
       this._node.appendChild
       document.body.appendChild(this._node);

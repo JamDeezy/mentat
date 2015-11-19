@@ -9,6 +9,7 @@ module flipp.mentat {
     }
 
     private _template = Handlebars.templates['f-lines'];
+    private _tip: Tooltip;
 
     createdCallback() {
       if (!this._linesElement)
@@ -111,7 +112,8 @@ module flipp.mentat {
 
         set.append("path")
            .attr("class", "line")
-           .attr("d", (d: any) => { return line(d.values); })
+           .attr("d", (d: any) => {
+             return line(d.values); })
            .style("stroke", (d: any) => { return color(d.column); });
 
         if (this.hoverable) {
@@ -123,13 +125,18 @@ module flipp.mentat {
             .style("stroke-dasharray", ("3, 3"))
             .attr("y1", 0)
             .attr("y2", height);
-          scanner.append("circle")
+
+          var point = scanner.append("circle")
             .style("fill", "steelblue")
             .attr("r", 4);
 
           var tip = new Tooltip(svg)
-            .offset([5, 0])
+            .offset([20, 5])
             .html((d: any) => { return this.hoverHtml(d.source); })
+
+          if (this._tip)
+            this._tip.remove();
+          this._tip = tip;
 
           svg.append("rect")
             .attr("class", "overlay")
@@ -148,9 +155,10 @@ module flipp.mentat {
 
               scanner.style("display", null)
                 .attr("transform", "translate(" + x(d.date) + ", 0)");
-              scanner.select('circle')
-                .attr("transform", "translate(0, " + y(d.value)+ ")")
-              tip.show([x(d.date), y(d.value)], d);
+              point.attr("transform", "translate(0, " + y(d.value)+ ")")
+
+              var position = $(point[0][0]).offset();
+              tip.show([position.left, position.top], d);
             });
         }
       }
