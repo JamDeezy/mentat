@@ -46,12 +46,6 @@ module flipp.mentat {
 
       var width     = this.innerWidth;
       var height    = this.innerHeight;
-      var x         = d3.time.scale().range([0, width]);
-      var y         = d3.scale.linear().range([height, 0]);
-      var xAxis     = d3.svg.axis().scale(x).orient("bottom");
-      var yAxis     = d3.svg.axis().scale(y).orient("left")
-                        .tickSize(0 - width)
-                        .tickPadding(8);
       var line      = d3.svg.line()
                         .x(function(d: any) { return x(d.date); })
                         .y(function(d: any) { return y(d.value); });
@@ -81,7 +75,7 @@ module flipp.mentat {
               if (this.sum) {
                 var sum = 0, i = 0;
                 for (;i < this.columns.length; sum += +d[this.columns[i++]]);
-                return { date: d.date, value: sum, source: d };
+                return { date: d.date, value: d3.round(sum,2), source: d };
               } else {
                 return { date: d.date, value: +d[column], source: d };
               }
@@ -89,11 +83,30 @@ module flipp.mentat {
           }
         });
 
-        x.domain(d3.extent(data, (d: any) => { return d.date; }));
-        y.domain([0,
-          1.5 * d3.max(sets, (c: any) => {
-            return d3.max(c.values, (v: any) => { return v.value; }); })
-        ]);
+        var x = d3.time.scale().range([0, width])
+                  .domain(d3.extent(data, (d: any) => { return d.date; }));
+        var y = d3.scale.linear().range([height, 0])
+                  .domain([0,
+                    1.2 * d3.max(sets, (c: any) => {
+                      return d3.max(c.values, (v: any) => { return v.value; });
+                    })
+                  ]);
+
+        var xAxis = d3.svg.axis().scale(x).orient("bottom")
+                      .ticks(d3.time.daysTotal, 6)
+                      .tickFormat(function(d): string {
+                        if (d.getDate() < 7) {
+                          return d3.time.format("%b")(d);
+                        } else {
+                          return d3.time.format("%d")(d)
+                        }
+                      })
+                      .tickSize(40);
+        var yAxis = d3.svg.axis().scale(y).orient("left")
+                      .ticks(4)
+                      .tickFormat(d3.format("s"))
+                      .tickPadding(20)
+                      .tickSize(0 - width);
 
         svg.append("g")
            .attr("class", "x axis")
@@ -140,7 +153,7 @@ module flipp.mentat {
 
           svg.append("rect")
             .attr("class", "overlay")
-            .attr("width", width)
+            .attr("width", width + 10)
             .attr("height", height)
             .style("fill", "none")
             .style("pointer-events", "all")

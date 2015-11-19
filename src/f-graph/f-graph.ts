@@ -1,4 +1,5 @@
 /// <reference path="../f-mentat.ts"/>
+/// <reference path="f-d3-helper.ts"/>
 
 module flipp.mentat {
   export abstract class Graph {
@@ -8,7 +9,7 @@ module flipp.mentat {
      * CONSTANTS
      */
     protected static MARGIN = {
-      top: 20, right: 100, bottom: 30, left: 70
+      top: 20, right: 70, bottom: 100, left: 70
     };
     protected static DIMENSIONS = {
       width: 960, height: 480
@@ -150,6 +151,10 @@ module flipp.mentat {
       return d3.scale.ordinal().range(Graph.MATERIALPALLET);
     }
 
+    protected d3() {
+
+    }
+
     public hover(h: (d: any) => string): GraphElement {
       this.hoverHtml = h;
       return this._element;
@@ -213,6 +218,7 @@ module flipp.mentat {
     /*
      * Render cycle,
      */
+
     protected abstract render(): void;
   }
 

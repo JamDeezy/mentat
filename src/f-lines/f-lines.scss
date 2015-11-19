@@ -4,28 +4,35 @@ f-lines {
   position: relative;
   overflow: hidden;
 
-  .axis path,
-  .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-  }
-
   .line {
     fill: none;
     stroke-width: 3px;
   }
 
-  .y-axis .tick {
-    opacity: 0.7;
+  .axis {
+    path {
+      display: none;
+    }
+    line {
+      stroke: #ccc;
+      stroke-width: 1;
+    }
+    text {
+      font-size: 12px;
+      font-weight: bold;
+    }
   }
 
-  .axis path {
-    display: none;
-  }
+  .scanner {
+    line {
+      stroke-dasharray: 3 3;
+      stroke: black;
+    }
 
-  .scanner line {
-    stroke-dasharray: 3 3;
-    stroke: black;
+    circle {
+      fill: steelblue;
+      stroke: white;
+      stroke-width: 1.5px;
+    }
   }
 }
