@@ -3,8 +3,10 @@
   background: #304558;
   color: white;
   font-size: 15px;
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
+  pointer-events: none;
+  transform: translate(0, -50%);
 }
 .tooltip:after {
   right: 100%;
