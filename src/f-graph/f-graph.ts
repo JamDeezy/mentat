@@ -9,7 +9,7 @@ module flipp.mentat {
      * CONSTANTS
      */
     protected static MARGIN = {
-      top: 20, right: 70, bottom: 100, left: 70
+      top: 20, right: 0, bottom: 70, left: 45
     };
     protected static DIMENSIONS = {
       width: 960, height: 480
@@ -155,13 +155,13 @@ module flipp.mentat {
 
     }
 
-    public hover(h: (d: any) => string): GraphElement {
-      this.hoverHtml = h;
+    public hover(func: (d: any) => string): GraphElement {
+      this.hoverHtml = func;
       return this._element;
     }
 
-    public decode(d: (d: any) => any): GraphElement {
-      this.decodeData = d;
+    public decode(func: (d: any) => any): GraphElement {
+      this.decodeData = func;
       return this._element;
     }
 
@@ -215,6 +215,27 @@ module flipp.mentat {
       return this._element;
     }
 
+    public download(csv?: boolean): any {
+      var csv = (typeof csv === 'undefined') ? true : csv;
+      if (csv && typeof this.data !== 'string') {
+        // collect headers with key as first column
+        var headers = Object.keys(this.data[0]).filter((d) => {
+          return (d !== this.key);
+        });
+        headers.unshift(this.key);
+        // collect body
+        var body = this.data.map(function(row) {
+          return headers.map(function(header) {
+            return '"' + (row[header] || '') + '"';
+          });
+        });
+        body.unshift(headers);
+        return body.join('\r\n');
+      } else {
+        return this.data;
+      }
+    }
+
     /*
      * Render cycle,
      */
@@ -223,21 +244,20 @@ module flipp.mentat {
   }
 
   export interface GraphElement extends HTMLElement {
-    columns                  : Array<string>;
-    height                   : number;
-    hoverable                : boolean;
-    innerWidth               : number;
-    innerHeight              : number;
-    key                      : string;
-    src                      : string;
-    sum                      : boolean;
-    width                    : number;
-    update(hash: any)        : GraphElement;
-    load(param?: any)        : GraphElement;
-    hover(
-      h: (d: any) => string) : GraphElement;
-    decode(
-      d: (d: any) => any)    : GraphElement;
+    src                              : string;
+    columns                          : Array<string>;
+    key                              : string;
+    height                           : number;
+    width                            : number;
+    innerHeight                      : number;
+    innerWidth                       : number;
+    hoverable                        : boolean;
+    sum                              : boolean;
+    download(csv?: boolean)          : any;
+    update(hash: any)                : GraphElement;
+    load(param?: any)                : GraphElement;
+    hover(func: (d: any) => string)  : GraphElement;
+    decode(func: (d: any) => any)    : GraphElement;
   }
 
   export var GraphElement = registerElement('f-graph', HTMLElement, Graph);

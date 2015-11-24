@@ -59,7 +59,7 @@ module flipp.mentat {
                     this.translate(Graph.MARGIN.left, Graph.MARGIN.top));
 
       if (this.data) {
-        var data  = this.data.slice();
+        var data = $.extend(true, [], this.data);
         var color = this.flatColor10().domain(
           (this.sum) ? ["sum"] : this.columns);
 
@@ -147,8 +147,8 @@ module flipp.mentat {
             .offset([20, 5])
             .html((d: any) => { return this.hoverHtml(d.source); })
 
-          if (this._tip)
-            this._tip.remove();
+          // remove if it exists
+          if (this._tip) this._tip.remove();
           this._tip = tip;
 
           svg.append("rect")
@@ -161,10 +161,13 @@ module flipp.mentat {
               scanner.style("display", "none");
               tip.hide()
             }).on("mousemove", function() {
-              var date   = x.invert(d3.mouse(this)[0]);
-              var i      = d3.bisector((d: any) => { return d.date; })
-                             .left(sets[0].values, date, 1);
-              var d: any = sets[0].values[i - 1];
+              // find closes datapoint to our left
+              var date: any  = x.invert(d3.mouse(this)[0]);
+              var i          = d3.bisector((d: any) => { return d.date; })
+                                 .left(sets[0].values, date, 1);
+              var d0         = sets[0].values[i - 1];
+              var d1         = sets[0].values[i];
+              var d          = date - d0.date > d1.date - date ? d1 : d0;
 
               scanner.style("display", null)
                 .attr("transform", "translate(" + x(d.date) + ", 0)");

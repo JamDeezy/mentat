@@ -362,12 +362,12 @@ var flipp;
             };
             Graph.prototype.d3 = function () {
             };
-            Graph.prototype.hover = function (h) {
-                this.hoverHtml = h;
+            Graph.prototype.hover = function (func) {
+                this.hoverHtml = func;
                 return this._element;
             };
-            Graph.prototype.decode = function (d) {
-                this.decodeData = d;
+            Graph.prototype.decode = function (func) {
+                this.decodeData = func;
                 return this._element;
             };
             Graph.prototype.update = function (hash) {
@@ -422,11 +422,33 @@ var flipp;
                 }
                 return this._element;
             };
+            Graph.prototype.download = function (csv) {
+                var _this = this;
+                var csv = (typeof csv === 'undefined') ? true : csv;
+                if (csv && typeof this.data !== 'string') {
+                    // collect headers with key as first column
+                    var headers = Object.keys(this.data[0]).filter(function (d) {
+                        return (d !== _this.key);
+                    });
+                    headers.unshift(this.key);
+                    // collect body
+                    var body = this.data.map(function (row) {
+                        return headers.map(function (header) {
+                            return '"' + (row[header] || '') + '"';
+                        });
+                    });
+                    body.unshift(headers);
+                    return body.join('\r\n');
+                }
+                else {
+                    return this.data;
+                }
+            };
             /**
              * CONSTANTS
              */
             Graph.MARGIN = {
-                top: 20, right: 70, bottom: 100, left: 70
+                top: 20, right: 0, bottom: 70, left: 45
             };
             Graph.DIMENSIONS = {
                 width: 960, height: 480
@@ -662,7 +684,7 @@ var flipp;
 })(flipp || (flipp = {}));
 </script>
 <style>
-f-lines{display:block;font:10px sans-serif;position:relative;overflow:hidden}f-lines .line{fill:none;stroke-width:3px}f-lines .axis path{display:none}f-lines .axis line{stroke:#ccc;stroke-width:1}f-lines .axis text{font-size:12px;font-weight:bold}f-lines .scanner line{stroke-dasharray:3 3;stroke:black}f-lines .scanner circle{fill:steelblue;stroke:white;stroke-width:1.5px}
+f-lines{display:block;font:10px sans-serif;position:relative;overflow:hidden}f-lines .line{fill:none;stroke-width:3px}f-lines .axis path{display:none}f-lines .axis line{stroke:#ccc;stroke-width:1}f-lines .axis text{font-size:12px;font-weight:bold}f-lines .scanner line{stroke-dasharray:3 3;stroke:black}f-lines .scanner circle{fill:black;stroke:white;stroke-width:1.5px}
 
 </style>
 <style>
@@ -921,12 +943,12 @@ var flipp;
             };
             Graph.prototype.d3 = function () {
             };
-            Graph.prototype.hover = function (h) {
-                this.hoverHtml = h;
+            Graph.prototype.hover = function (func) {
+                this.hoverHtml = func;
                 return this._element;
             };
-            Graph.prototype.decode = function (d) {
-                this.decodeData = d;
+            Graph.prototype.decode = function (func) {
+                this.decodeData = func;
                 return this._element;
             };
             Graph.prototype.update = function (hash) {
@@ -981,11 +1003,33 @@ var flipp;
                 }
                 return this._element;
             };
+            Graph.prototype.download = function (csv) {
+                var _this = this;
+                var csv = (typeof csv === 'undefined') ? true : csv;
+                if (csv && typeof this.data !== 'string') {
+                    // collect headers with key as first column
+                    var headers = Object.keys(this.data[0]).filter(function (d) {
+                        return (d !== _this.key);
+                    });
+                    headers.unshift(this.key);
+                    // collect body
+                    var body = this.data.map(function (row) {
+                        return headers.map(function (header) {
+                            return '"' + (row[header] || '') + '"';
+                        });
+                    });
+                    body.unshift(headers);
+                    return body.join('\r\n');
+                }
+                else {
+                    return this.data;
+                }
+            };
             /**
              * CONSTANTS
              */
             Graph.MARGIN = {
-                top: 20, right: 70, bottom: 100, left: 70
+                top: 20, right: 0, bottom: 70, left: 45
             };
             Graph.DIMENSIONS = {
                 width: 960, height: 480
@@ -1123,7 +1167,7 @@ var flipp;
                     .append("g")
                     .attr("transform", this.translate(mentat.Graph.MARGIN.left, mentat.Graph.MARGIN.top));
                 if (this.data) {
-                    var data = this.data.slice();
+                    var data = $.extend(true, [], this.data);
                     var color = this.flatColor10().domain((this.sum) ? ["sum"] : this.columns);
                     // Let decode our data
                     data.forEach(function (d) { d = _this.decodeData(d); });
@@ -1201,6 +1245,7 @@ var flipp;
                         var tip = new mentat.Tooltip(svg)
                             .offset([20, 5])
                             .html(function (d) { return _this.hoverHtml(d.source); });
+                        // remove if it exists
                         if (this._tip)
                             this._tip.remove();
                         this._tip = tip;
@@ -1214,10 +1259,13 @@ var flipp;
                             scanner.style("display", "none");
                             tip.hide();
                         }).on("mousemove", function () {
+                            // find closes datapoint to our left
                             var date = x.invert(d3.mouse(this)[0]);
                             var i = d3.bisector(function (d) { return d.date; })
                                 .left(sets[0].values, date, 1);
-                            var d = sets[0].values[i - 1];
+                            var d0 = sets[0].values[i - 1];
+                            var d1 = sets[0].values[i];
+                            var d = date - d0.date > d1.date - date ? d1 : d0;
                             scanner.style("display", null)
                                 .attr("transform", "translate(" + x(d.date) + ", 0)");
                             point.attr("transform", "translate(0, " + y(d.value) + ")");
