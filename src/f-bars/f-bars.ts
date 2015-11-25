@@ -41,12 +41,24 @@ module flipp.mentat {
         this.load();
     }
 
+    detachedCallback() {
+      if (this._tip) this._tip.remove();
+    }
+
     get normalized(): boolean {
       return this._barsElement.getAttribute('normalized') === 'true';
     }
 
     set normalized(newNormalized: boolean) {
       this._barsElement.setAttribute('normalized', newNormalized.toString());
+    }
+
+    get sorted(): boolean {
+      return this._barsElement.getAttribute('sorted') === 'true';
+    }
+
+    set sorted(newSorted: boolean) {
+      this._barsElement.setAttribute('sorted', newSorted.toString());
     }
 
     protected render() {
@@ -69,7 +81,7 @@ module flipp.mentat {
                     Graph.MARGIN.left, Graph.MARGIN.top));
 
       if (this.data) {
-        var data  = this.data.slice();
+        var data = $.extend(true, [], this.data);
         var color = this.flatColor10().domain(this.columns);
 
         // TODO this isn't up to par with lines
@@ -98,13 +110,15 @@ module flipp.mentat {
           }
         });
 
-        data.sort((a: any, b: any) => {
-          if (this.normalized) {
-            return b.sets[0].y1 - a.sets[0].y1;
-          } else {
-            return b.total - a.total;
-          }
-        });
+        if (this.sorted) {
+          data.sort((a: any, b: any) => {
+            if (this.normalized) {
+              return b.sets[0].y1 - a.sets[0].y1;
+            } else {
+              return b.total - a.total;
+            }
+          });
+        }
 
         x.domain(data.map(function(d: any) { return d.bucket; }));
         if (!this.normalized) {
@@ -142,17 +156,20 @@ module flipp.mentat {
 
         // Hover functionality
         if (this.hoverable) {
-          if (this._tip) {
-            this._tip.remove();
-            this._tip = new Tooltip(svg)
-              .html((d: any) => { return this.hoverHtml(d); })
-          }
+          var tip = new Tooltip(svg)
+            .offset([20, 5])
+            .html((d: any) => { return this.hoverHtml(d); })
+
+          // remove if it exists
+          if (this._tip) this._tip.remove();
+          this._tip = tip;
 
           // TODO position not quite right
-          bucket.on("mouseover", (d) => {
-            this._tip.show(d3.mouse(svg[0][0]), d);
-          }).on("mouseout", () => {
-            this._tip.hide()
+          bucket.on("mouseenter", function(d) {
+            var position = $(this).offset();
+            tip.show([position.left, position.top], d);
+          }).on("mouseleave", () => {
+            tip.hide()
           });
         }
       }
@@ -161,6 +178,7 @@ module flipp.mentat {
 
   export interface BarsElement extends GraphElement {
     normalized: boolean;
+    sorted: boolean;
   }
 
   export var BarsElement = registerElement('f-bars', HTMLElement, Bars);

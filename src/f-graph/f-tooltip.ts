@@ -8,7 +8,6 @@ module flipp.mentat {
     private _offset    : Array<number> = [0, 0];
     private _direction : string = 'n';
     private _parent    : d3.Selection<any>;
-    private _position  : Array<number> = [0, 0];
 
     constructor(parent: d3.Selection<any>) {
       this._parent = parent;
@@ -18,12 +17,9 @@ module flipp.mentat {
 
     public show(v, d): Tooltip {
       this._node.innerHTML = this._html(d);
-      if (!(this._position[0] === v[0] && this._position[1] === v[1])) {
-        this._position = v;
-        this._node.style.left = (v[0] + this._offset[0]) + 'px'
-        this._node.style.top = (v[1] + this._offset[1]) + 'px';
-        this._node.style.opacity = '1';
-      }
+      this._node.style.left = (v[0] + this._offset[0]) + 'px'
+      this._node.style.top = (v[1] + this._offset[1]) + 'px';
+      this._node.style.opacity = '1';
       return this;
     }
 

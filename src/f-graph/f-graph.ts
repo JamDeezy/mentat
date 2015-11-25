@@ -9,7 +9,7 @@ module flipp.mentat {
      * CONSTANTS
      */
     protected static MARGIN = {
-      top: 20, right: 0, bottom: 70, left: 45
+      top: 20, right: 0, bottom: 70, left: 55
     };
     protected static DIMENSIONS = {
       width: 960, height: 480

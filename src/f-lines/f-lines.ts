@@ -41,6 +41,10 @@ module flipp.mentat {
         this.load();
     }
 
+    detachedCallback() {
+      if (this._tip) this._tip.remove();
+    }
+
     protected render() {
       this._linesElement.innerHTML = '';
 
