@@ -3,7 +3,7 @@
 
 module flipp.mentat {
   export abstract class Graph {
-    constructor(private _element: GraphElement) { }
+    constructor(protected _element: GraphElement) { }
 
     /**
      * CONSTANTS
@@ -17,6 +17,10 @@ module flipp.mentat {
     protected static FLATPALLET = [
       "#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
       "#e74c3c", "#9b59b6", "#ecf0f1", "#95a5a6", "#34495e"
+    ];
+    protected static FALLPALLET = [
+      "#98abc5", "#8a89a6", "#7b6888", "#6b486b",
+      "#a05d56", "#d0743c", "#ff8c00"
     ];
     protected static MATERIALPALLET = [
       "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
@@ -143,16 +147,14 @@ module flipp.mentat {
       this._skipCallback = false;
     }
 
+    protected fallColor7(): d3.scale.Ordinal<any, any> {
+      return d3.scale.ordinal().range(Graph.FALLPALLET);
+    }
     protected flatColor10(): d3.scale.Ordinal<any, any> {
       return d3.scale.ordinal().range(Graph.FLATPALLET);
     }
-
     protected materialColor20(): d3.scale.Ordinal<any, any> {
       return d3.scale.ordinal().range(Graph.MATERIALPALLET);
-    }
-
-    protected d3() {
-
     }
 
     public hover(func: (d: any) => string): GraphElement {
@@ -252,11 +254,13 @@ module flipp.mentat {
     innerHeight                      : number;
     innerWidth                       : number;
     hoverable                        : boolean;
+    clickable                        : boolean;
     sum                              : boolean;
     download(csv?: boolean)          : any;
     update(hash: any)                : GraphElement;
     load(param?: any)                : GraphElement;
     hover(func: (d: any) => string)  : GraphElement;
+    // click(func: (d: any) => string)  : GraphElement;
     decode(func: (d: any) => any)    : GraphElement;
   }
 

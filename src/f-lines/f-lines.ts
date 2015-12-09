@@ -46,29 +46,32 @@ module flipp.mentat {
     }
 
     protected render() {
-      this._linesElement.innerHTML = '';
+this._linesElement.innerHTML = '';
 
-      var width     = this.innerWidth;
-      var height    = this.innerHeight;
-      var line      = d3.svg.line()
-                        .x(function(d: any) { return x(d.date); })
-                        .y(function(d: any) { return y(d.value); });
+var width     = this.innerWidth;
+var height    = this.innerHeight;
+var line      = d3.svg.line()
+                  .x(function(d: any) { return x(d.date); })
+                  .y(function(d: any) { return y(d.value); });
 
-      var svg = d3.select(this._linesElement)
-                  .append("svg")
-                  .attr("width", this.width)
-                  .attr("height", this.height)
-                  .append("g")
-                  .attr("transform",
-                    this.translate(Graph.MARGIN.left, Graph.MARGIN.top));
+var svg = d3.select(this._linesElement)
+            .append("svg")
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .append("g")
+            .attr("transform",
+              this.translate(Graph.MARGIN.left, Graph.MARGIN.top));
 
-      if (this.data) {
-        var data = $.extend(true, [], this.data);
+      if (this.data && this.data.length > 0) {
+        var data = $.extend(true, [], this.data)
         var color = this.flatColor10().domain(
           (this.sum) ? ["sum"] : this.columns);
 
         // Let decode our data
         data.forEach((d: any) => { d = this.decodeData(d); });
+        data = data.sort((a: any, b: any) => {
+          return a.date - b.date
+        });
 
         // if we're summing, add all columns together under sum key
         // otherwise each column has a key to its value
@@ -78,8 +81,8 @@ module flipp.mentat {
             values: data.map((d: any) => {
               if (this.sum) {
                 var sum = 0, i = 0;
-                for (;i < this.columns.length; sum += +d[this.columns[i++]]);
-                return { date: d.date, value: d3.round(sum,2), source: d };
+                for (; i < this.columns.length; sum += +d[this.columns[i++]]);
+                return { date: d.date, value: d3.round(sum, 2), source: d };
               } else {
                 return { date: d.date, value: +d[column], source: d };
               }
@@ -88,50 +91,52 @@ module flipp.mentat {
         });
 
         var x = d3.time.scale().range([0, width])
-                  .domain(d3.extent(data, (d: any) => { return d.date; }));
+          .domain(d3.extent(data, (d: any) => { return d.date; }));
         var y = d3.scale.linear().range([height, 0])
-                  .domain([0,
-                    1.2 * d3.max(sets, (c: any) => {
-                      return d3.max(c.values, (v: any) => { return v.value; });
-                    })
-                  ]);
+          .domain([0,
+            1.2 * d3.max(sets, (c: any) => {
+              return d3.max(c.values, (v: any) => { return v.value; });
+            })
+          ]);
 
         var xAxis = d3.svg.axis().scale(x).orient("bottom")
-                      .ticks(d3.time.daysTotal, 6)
-                      .tickFormat(function(d): string {
-                        if (d.getDate() < 7) {
-                          return d3.time.format("%b")(d);
-                        } else {
-                          return d3.time.format("%d")(d)
-                        }
-                      })
-                      .tickSize(40);
+          .ticks(d3.time.daysTotal, 6)
+          .tickFormat(function(d): string {
+            if (d.getDate() < 7) {
+              return d3.time.format("%b")(d);
+            } else {
+              return d3.time.format("%d")(d)
+            }
+          })
+          .tickSize(40);
+
         var yAxis = d3.svg.axis().scale(y).orient("left")
-                      .ticks(4)
-                      .tickFormat(d3.format("s"))
-                      .tickPadding(20)
-                      .tickSize(0 - width);
+          .ticks(4)
+          .tickFormat(d3.format("s"))
+          .tickPadding(20)
+          .tickSize(0 - width);
 
         svg.append("g")
-           .attr("class", "x axis")
-           .attr("transform", this.translate(0, height))
-           .call(xAxis);
+          .attr("class", "x axis")
+          .attr("transform", this.translate(0, height))
+          .call(xAxis);
 
         svg.append("g")
-           .attr("class", "y axis")
-           .call(yAxis);
+          .attr("class", "y axis")
+          .call(yAxis);
 
         var set = svg.selectAll(".set")
-                     .data(sets)
-                     .enter()
-                     .append("g")
-                     .attr("class", "set");
+          .data(sets)
+          .enter()
+          .append("g")
+          .attr("class", "set");
 
         set.append("path")
-           .attr("class", "line")
-           .attr("d", (d: any) => {
-             return line(d.values); })
-           .style("stroke", (d: any) => { return color(d.column); });
+          .attr("class", "line")
+          .attr("d", (d: any) => {
+            return line(d.values);
+          })
+          .style("stroke", (d: any) => { return color(d.column); });
 
         if (this.hoverable) {
           var scanner = svg.append("g")
@@ -153,7 +158,7 @@ module flipp.mentat {
 
           // remove if it exists
           if (this._tip) this._tip.remove();
-          this._tip = tip;
+            this._tip = tip;
 
           svg.append("rect")
             .attr("class", "overlay")
@@ -166,21 +171,44 @@ module flipp.mentat {
               tip.hide()
             }).on("mousemove", function() {
               // find closes datapoint to our left
-              var date: any  = x.invert(d3.mouse(this)[0]);
-              var i          = d3.bisector((d: any) => { return d.date; })
-                                 .left(sets[0].values, date, 1);
-              var d0         = sets[0].values[i - 1];
-              var d1         = sets[0].values[i];
-              var d          = date - d0.date > d1.date - date ? d1 : d0;
+              var date: any = x.invert(d3.mouse(this)[0]);
+              var i = d3.bisector((d: any) => { return d.date; })
+                .left(sets[0].values, date, 1);
+              var d0 = sets[0].values[i - 1];
+              var d1 = sets[0].values[i];
+              var d = date - d0.date > d1.date - date ? d1 : d0;
 
               scanner.style("display", null)
                 .attr("transform", "translate(" + x(d.date) + ", 0)");
-              point.attr("transform", "translate(0, " + y(d.value)+ ")")
+              point.attr("transform", "translate(0, " + y(d.value) + ")")
 
               var position = $(point[0][0]).offset();
               tip.show([position.left, position.top], d);
+            }).on("click", function(d) {
+              // find closes datapoint to our left
+              var date: any = x.invert(d3.mouse(this)[0]);
+              var i = d3.bisector((d: any) => { return d.date; })
+                .left(sets[0].values, date, 1);
+              var d0 = sets[0].values[i - 1];
+              var d1 = sets[0].values[i];
+              var d = date - d0.date > d1.date - date ? d1 : d0;
             });
         }
+      } else {
+        d3.select(this._element).select('svg')
+          .append("rect")
+          .attr("class", "overlay")
+          .attr("width", this.width)
+          .attr("height", this.height)
+          .attr("fill", "#f7f7f7")
+        d3.select(this._element).select('svg')
+          .append('text')
+          .text('No available data')
+          .attr('text-anchor', 'middle')
+          .attr("transform",
+          "translate(" + this.width / 2 + ", " + this.height / 2 + ")")
+          .attr('font-size', '24px')
+          .attr("fill", "#777777")
       }
     }
   }

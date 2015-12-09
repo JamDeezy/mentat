@@ -107,7 +107,7 @@ Nd.millisecond=Nd.milliseconds=Md,Nd.utcOffset=Na,Nd.utc=Pa,Nd.local=Qa,Nd.parse
 
 </style>
 <style>
-f-bars{display:block;font:10px sans-serif;position:relative;overflow:hidden}f-bars .axis path,f-bars .axis line{fill:none;stroke:#000;shape-rendering:crispEdges}f-bars .axis path{display:none}
+f-bars{display:block;font:10px sans-serif;position:relative;overflow:visible}f-bars svg{overflow:visible !important}f-bars .axis path,f-bars .axis line{fill:none;stroke:#000;shape-rendering:crispEdges}f-bars .axis path{display:none}
 
 </style>
 <script>(function() {
@@ -354,13 +354,14 @@ var flipp;
                 block();
                 this._skipCallback = false;
             };
+            Graph.prototype.fallColor7 = function () {
+                return d3.scale.ordinal().range(Graph.FALLPALLET);
+            };
             Graph.prototype.flatColor10 = function () {
                 return d3.scale.ordinal().range(Graph.FLATPALLET);
             };
             Graph.prototype.materialColor20 = function () {
                 return d3.scale.ordinal().range(Graph.MATERIALPALLET);
-            };
-            Graph.prototype.d3 = function () {
             };
             Graph.prototype.hover = function (func) {
                 this.hoverHtml = func;
@@ -456,6 +457,10 @@ var flipp;
             Graph.FLATPALLET = [
                 "#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
                 "#e74c3c", "#9b59b6", "#ecf0f1", "#95a5a6", "#34495e"
+            ];
+            Graph.FALLPALLET = [
+                "#98abc5", "#8a89a6", "#7b6888", "#6b486b",
+                "#a05d56", "#d0743c", "#ff8c00"
             ];
             Graph.MATERIALPALLET = [
                 "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
@@ -590,23 +595,41 @@ var flipp;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Bars.prototype, "vertical", {
+                get: function () {
+                    return this._barsElement.getAttribute('vertical') === 'true';
+                },
+                set: function (newVertical) {
+                    this._barsElement.setAttribute('vertical', newVertical.toString());
+                },
+                enumerable: true,
+                configurable: true
+            });
             Bars.prototype.render = function () {
                 var _this = this;
                 // Render cycles should be independent of each other
                 this._barsElement.innerHTML = '';
                 var width = this.innerWidth;
                 var height = this.innerHeight;
+                if (this.vertical) {
+                    width = this.innerHeight;
+                    height = this.innerWidth;
+                }
                 var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
                 var y = d3.scale.linear().rangeRound([height, 0]);
                 var xAxis = d3.svg.axis().scale(x).orient("bottom");
                 var yAxis = d3.svg.axis().scale(y).orient("left");
+                if (this.vertical) {
+                    xAxis = d3.svg.axis().scale(x).orient("left");
+                    yAxis = d3.svg.axis().scale(y).orient("top");
+                }
                 var svg = d3.select(this._barsElement)
                     .append("svg")
                     .attr("width", this.width)
                     .attr("height", this.height)
                     .append("g")
                     .attr("transform", this.translate(mentat.Graph.MARGIN.left, mentat.Graph.MARGIN.top));
-                if (this.data) {
+                if (this.data && this.data.length > 0) {
                     var data = $.extend(true, [], this.data);
                     var color = this.flatColor10().domain(this.columns);
                     // TODO this isn't up to par with lines
@@ -646,33 +669,77 @@ var flipp;
                     }
                     x.domain(data.map(function (d) { return d.bucket; }));
                     if (!this.normalized) {
-                        y.domain([0, d3.max(data, function (d) { return d.total; })]);
+                        if (this.vertical) {
+                            y.domain([d3.max(data, function (d) { return d.total; }), 0]);
+                        }
+                        else {
+                            y.domain([0, d3.max(data, function (d) { return d.total; })]);
+                        }
                     }
-                    svg.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(xAxis);
+                    else {
+                        if (this.vertical) {
+                            y.domain([1, 0]);
+                        }
+                    }
+                    if (this.vertical) {
+                        svg.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0, 0)")
+                            .call(xAxis)
+                            .selectAll(".tick text")
+                            .text(function (d) {
+                            return (d.length > 11) ? d.substring(0, 5) + '...' : d;
+                        });
+                    }
+                    else {
+                        svg.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(xAxis);
+                    }
                     svg.append("g")
                         .attr("class", "y axis")
                         .call(yAxis);
-                    // Draw bars
-                    var bucket = svg.selectAll(".bucket")
-                        .data(data)
-                        .enter()
-                        .append("g")
-                        .attr("class", "bucket")
-                        .attr("transform", function (d) {
-                        return _this.translate(x(d.bucket), 0);
-                    });
-                    bucket.selectAll("rect")
-                        .data(function (d) { return d.sets; })
-                        .enter()
-                        .append("rect")
-                        .attr("class", "set")
-                        .attr("width", x.rangeBand())
-                        .attr("y", function (d) { return y(d.y1); })
-                        .attr("height", function (d) { return y(d.y0) - y(d.y1); })
-                        .style("fill", function (d) { return d.color; });
+                    if (this.vertical) {
+                        // Draw bars
+                        var bucket = svg.selectAll(".bucket")
+                            .data(data)
+                            .enter()
+                            .append("g")
+                            .attr("class", "bucket")
+                            .attr("transform", function (d) {
+                            return _this.translate(0, x(d.bucket));
+                        });
+                        bucket.selectAll("rect")
+                            .data(function (d) { return d.sets; })
+                            .enter()
+                            .append("rect")
+                            .attr("class", "set")
+                            .attr("height", x.rangeBand())
+                            .attr("x", function (d) { return y(d.y0); })
+                            .attr("width", function (d) { return y(d.y1) - y(d.y0); })
+                            .style("fill", function (d) { return d.color; });
+                    }
+                    else {
+                        // Draw bars
+                        var bucket = svg.selectAll(".bucket")
+                            .data(data)
+                            .enter()
+                            .append("g")
+                            .attr("class", "bucket")
+                            .attr("transform", function (d) {
+                            return _this.translate(x(d.bucket), 0);
+                        });
+                        bucket.selectAll("rect")
+                            .data(function (d) { return d.sets; })
+                            .enter()
+                            .append("rect")
+                            .attr("class", "set")
+                            .attr("width", x.rangeBand())
+                            .attr("y", function (d) { return y(d.y1); })
+                            .attr("height", function (d) { return y(d.y0) - y(d.y1); })
+                            .style("fill", function (d) { return d.color; });
+                    }
                     // Hover functionality
                     if (this.hoverable) {
                         var tip = new mentat.Tooltip(svg)
@@ -691,6 +758,21 @@ var flipp;
                         });
                     }
                 }
+                else {
+                    d3.select(this._element).select('svg')
+                        .append("rect")
+                        .attr("class", "overlay")
+                        .attr("width", this.width)
+                        .attr("height", this.height)
+                        .attr("fill", "#f7f7f7");
+                    d3.select(this._element).select('svg')
+                        .append('text')
+                        .text('No available data')
+                        .attr('text-anchor', 'middle')
+                        .attr("transform", "translate(" + this.width / 2 + ", " + this.height / 2 + ")")
+                        .attr('font-size', '24px')
+                        .attr("fill", "#777777");
+                }
             };
             return Bars;
         })(mentat.Graph);
@@ -699,7 +781,7 @@ var flipp;
 })(flipp || (flipp = {}));
 </script>
 <style>
-f-lines{display:block;font:10px sans-serif;position:relative;overflow:hidden}f-lines .line{fill:none;stroke-width:3px}f-lines .axis path{display:none}f-lines .axis line{stroke:#ccc;stroke-width:1}f-lines .axis text{font-size:12px;font-weight:bold}f-lines .scanner line{stroke-dasharray:3 3;stroke:black}f-lines .scanner circle{fill:black;stroke:white;stroke-width:1.5px}
+f-lines{display:block;font:10px sans-serif;position:relative;overflow:visible}f-lines svg{overflow:visible !important}f-lines .line{fill:none;stroke-width:3px}f-lines .axis path{display:none}f-lines .axis line{stroke:#ccc;stroke-width:1}f-lines .axis text{font-size:12px;font-weight:bold}f-lines .scanner line{stroke-dasharray:3 3;stroke:black}f-lines .scanner circle{fill:black;stroke:white;stroke-width:1.5px}
 
 </style>
 <style>
@@ -950,13 +1032,14 @@ var flipp;
                 block();
                 this._skipCallback = false;
             };
+            Graph.prototype.fallColor7 = function () {
+                return d3.scale.ordinal().range(Graph.FALLPALLET);
+            };
             Graph.prototype.flatColor10 = function () {
                 return d3.scale.ordinal().range(Graph.FLATPALLET);
             };
             Graph.prototype.materialColor20 = function () {
                 return d3.scale.ordinal().range(Graph.MATERIALPALLET);
-            };
-            Graph.prototype.d3 = function () {
             };
             Graph.prototype.hover = function (func) {
                 this.hoverHtml = func;
@@ -1052,6 +1135,10 @@ var flipp;
             Graph.FLATPALLET = [
                 "#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
                 "#e74c3c", "#9b59b6", "#ecf0f1", "#95a5a6", "#34495e"
+            ];
+            Graph.FALLPALLET = [
+                "#98abc5", "#8a89a6", "#7b6888", "#6b486b",
+                "#a05d56", "#d0743c", "#ff8c00"
             ];
             Graph.MATERIALPALLET = [
                 "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
@@ -1181,11 +1268,14 @@ var flipp;
                     .attr("height", this.height)
                     .append("g")
                     .attr("transform", this.translate(mentat.Graph.MARGIN.left, mentat.Graph.MARGIN.top));
-                if (this.data) {
+                if (this.data && this.data.length > 0) {
                     var data = $.extend(true, [], this.data);
                     var color = this.flatColor10().domain((this.sum) ? ["sum"] : this.columns);
                     // Let decode our data
                     data.forEach(function (d) { d = _this.decodeData(d); });
+                    data = data.sort(function (a, b) {
+                        return a.date - b.date;
+                    });
                     // if we're summing, add all columns together under sum key
                     // otherwise each column has a key to its value
                     var sets = color.domain().map(function (column) {
@@ -1286,8 +1376,31 @@ var flipp;
                             point.attr("transform", "translate(0, " + y(d.value) + ")");
                             var position = $(point[0][0]).offset();
                             tip.show([position.left, position.top], d);
+                        }).on("click", function (d) {
+                            // find closes datapoint to our left
+                            var date = x.invert(d3.mouse(this)[0]);
+                            var i = d3.bisector(function (d) { return d.date; })
+                                .left(sets[0].values, date, 1);
+                            var d0 = sets[0].values[i - 1];
+                            var d1 = sets[0].values[i];
+                            var d = date - d0.date > d1.date - date ? d1 : d0;
                         });
                     }
+                }
+                else {
+                    d3.select(this._element).select('svg')
+                        .append("rect")
+                        .attr("class", "overlay")
+                        .attr("width", this.width)
+                        .attr("height", this.height)
+                        .attr("fill", "#f7f7f7");
+                    d3.select(this._element).select('svg')
+                        .append('text')
+                        .text('No available data')
+                        .attr('text-anchor', 'middle')
+                        .attr("transform", "translate(" + this.width / 2 + ", " + this.height / 2 + ")")
+                        .attr('font-size', '24px')
+                        .attr("fill", "#777777");
                 }
             };
             return Lines;
@@ -1306,89 +1419,62 @@ templates['f-pie'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(
     return "<div>\n  sample\n</div>";
 },"useData":true});
 })();</script>
-<script>/// <reference path="dts/d3.d.ts"/>
-/// <reference path="dts/handlebars.d.ts"/>
-/// <reference path="dts/jquery.d.ts"/>
-/// <reference path="dts/moment.d.ts"/>
-/// <reference path="dts/webcomponents.d.ts"/>
-/// <reference path="dts/velocity.d.ts"/>
-var flipp;
-(function (flipp) {
-    var mentat;
-    (function (mentat) {
-        function getPropertyDescriptor(obj, prop) {
-            for (var proto = obj; proto; proto = Object.getPrototypeOf(proto)) {
-                var desc = Object.getOwnPropertyDescriptor(proto, prop);
-                if (desc)
-                    return desc;
-            }
-            return undefined;
-        }
-        function getProperties(obj) {
-            var properties = [];
-            for (var proto = obj; proto; proto = Object.getPrototypeOf(proto)) {
-                Object.getOwnPropertyNames(proto).forEach(function (property) {
-                    if (properties.indexOf(property) === -1)
-                        properties.push(property);
-                });
-            }
-            return properties;
-        }
-        function getFullPrototype(proto) {
-            return getProperties(proto).reduce(function (map, prop) {
-                map[prop] = getPropertyDescriptor(proto, prop);
-                return map;
-            }, {});
-        }
-        function registerElement(elName, elBase, el, elExtend) {
-            if (!registered(elName)) {
-                var options = {
-                    prototype: Object.create(elBase.prototype, getFullPrototype(el.prototype))
-                };
-                if (elExtend)
-                    options.extends = elExtend;
-                return document.registerElement(elName, options);
-            }
-        }
-        mentat.registerElement = registerElement;
-        function registered(elName) {
-            switch (document.createElement(elName).constructor) {
-                case HTMLElement: return false;
-                case HTMLUnknownElement: return undefined;
-            }
-            return true;
-        }
-        mentat.registered = registered;
-        function createDocumentFragment(html) {
-            return document.createRange().createContextualFragment(html);
-        }
-        mentat.createDocumentFragment = createDocumentFragment;
-        function getChild(parent, selector) {
-            return $(parent).find(selector);
-        }
-        mentat.getChild = getChild;
-    })(mentat = flipp.mentat || (flipp.mentat = {}));
-})(flipp || (flipp = {}));
-/// <reference path="../f-mentat.ts"/>
-var flipp;
-(function (flipp) {
-    var mentat;
-    (function (mentat) {
-        var Pie = (function () {
-            function Pie(_element) {
-                this._element = _element;
-                this._template = Handlebars.templates['f-pie'];
-            }
-            Pie.prototype.createdCallback = function () {
-                if (!this._element)
-                    Pie.call(this, this);
-                this._element.innerHTML = '';
-                this._element.appendChild(mentat.createDocumentFragment(this._template({})));
-            };
-            return Pie;
-        })();
-        mentat.PieElement = mentat.registerElement('f-pie', HTMLElement, Pie);
-    })(mentat = flipp.mentat || (flipp.mentat = {}));
-})(flipp || (flipp = {}));
+<script>// /// <reference path="../f-mentat.ts"/>
+// /// <reference path="../f-graph/f-graph.ts"/>
+// /// <reference path="../f-graph/f-tooltip.ts"/>
+// module flipp.mentat {
+//   class Pie extends Graph {
+//       constructor() { super(null); debugger;}
+//     private _template = Handlebars.templates['f-pie'];
+//     createdCallback() {
+//       if (!this._element)
+//         Graph.call(this, this);
+//       this._element.innerHTML = '';
+//       this._element.appendChild(
+//         createDocumentFragment(this._template({})));
+//     }
+//     protected render() {
+//       var width = this.innerWidth;
+//       var height = this.innerHeight;
+//       var radius = Math.min(width, height) / 2;
+//       var color = this.fallColor7();
+//       var arc = d3.svg.arc()
+//           .outerRadius(radius - 10)
+//           .innerRadius(0);
+//       var labelArc = d3.svg.arc()
+//           .outerRadius(radius - 40)
+//           .innerRadius(radius - 40);
+//       var pie = d3.layout.pie()
+//           .sort(null)
+//           .value(function(d) { return d.population; });
+//       var svg = d3.select("body").append("svg")
+//           .attr("width", width)
+//           .attr("height", height)
+//           .append("g")
+//           .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+//       d3.csv("data.csv", type, function(error, data) {
+//           if (error) throw error;
+//           var g = svg.selectAll(".arc")
+//               .data(pie(data))
+//               .enter().append("g")
+//               .attr("class", "arc");
+//           g.append("path")
+//               .attr("d", arc)
+//               .style("fill", function(d) { return color(d.data.age); });
+//           g.append("text")
+//               .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+//               .attr("dy", ".35em")
+//               .text(function(d) { return d.data.age; });
+//       });
+//       function type(d) {
+//           d.population = +d.population;
+//           return d;
+//       }
+//     }
+//   }
+//   export interface PieElement extends HTMLElement {
+//   }
+//   export var PieElement = registerElement('f-pie', HTMLElement, Pie);
+// } 
 </script>
 </head><body></body></html>

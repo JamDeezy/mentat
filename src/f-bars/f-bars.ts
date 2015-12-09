@@ -61,16 +61,35 @@ module flipp.mentat {
       this._barsElement.setAttribute('sorted', newSorted.toString());
     }
 
+    get vertical(): boolean {
+      return this._barsElement.getAttribute('vertical') === 'true';
+    }
+
+    set vertical(newVertical) {
+      this._barsElement.setAttribute('vertical', newVertical.toString());
+    }
+
     protected render() {
       // Render cycles should be independent of each other
       this._barsElement.innerHTML = '';
 
       var width     = this.innerWidth;
       var height    = this.innerHeight;
+
+      if (this.vertical) {
+        width = this.innerHeight;
+        height = this.innerWidth;
+      }
+
       var x         = d3.scale.ordinal().rangeRoundBands([0, width], .1);
       var y         = d3.scale.linear().rangeRound([height, 0]);
       var xAxis     = d3.svg.axis().scale(x).orient("bottom");
       var yAxis     = d3.svg.axis().scale(y).orient("left");
+
+      if (this.vertical) {
+        xAxis = d3.svg.axis().scale(x).orient("left");
+        yAxis = d3.svg.axis().scale(y).orient("top");
+      }
 
       var svg = d3.select(this._barsElement)
                   .append("svg")
@@ -80,7 +99,7 @@ module flipp.mentat {
                   .attr("transform", this.translate(
                     Graph.MARGIN.left, Graph.MARGIN.top));
 
-      if (this.data) {
+      if (this.data && this.data.length > 0) {
         var data = $.extend(true, [], this.data);
         var color = this.flatColor10().domain(this.columns);
 
@@ -121,38 +140,79 @@ module flipp.mentat {
         }
 
         x.domain(data.map(function(d: any) { return d.bucket; }));
-        if (!this.normalized) {
-          y.domain([0, d3.max(data, function(d: any) { return d.total; })]);
+        if (!this.normalized ) {
+          if (this.vertical) {
+            y.domain([d3.max(data, function(d: any) { return d.total; }), 0]);
+          } else {
+            y.domain([0, d3.max(data, function(d: any) { return d.total; })]);
+          }
+        } else {
+          if (this.vertical) {
+            y.domain([1, 0]);
+          }
         }
 
-        svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+        if (this.vertical) {
+          svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0, 0)")
+            .call(xAxis)
+            .selectAll(".tick text")
+            .text(function(d) {
+              return (d.length > 11) ? d.substring(0, 5) + '...' : d;
+            });
+        } else {
+          svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        }
 
         svg.append("g")
           .attr("class", "y axis")
           .call(yAxis);
 
-        // Draw bars
-        var bucket = svg.selectAll(".bucket")
-          .data(data)
-          .enter()
-          .append("g")
-          .attr("class", "bucket")
-          .attr("transform", (d: any) => {
-            return this.translate(x(d.bucket), 0)
-          });
+        if (this.vertical) {
+          // Draw bars
+          var bucket = svg.selectAll(".bucket")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("class", "bucket")
+            .attr("transform", (d: any) => {
+              return this.translate(0, x(d.bucket));
+            });
 
-        bucket.selectAll("rect")
-          .data(function(d: any) { return d.sets; })
-          .enter()
-          .append("rect")
-          .attr("class", "set")
-          .attr("width", x.rangeBand())
-          .attr("y", function(d: any) { return y(d.y1); })
-          .attr("height", function(d: any) { return y(d.y0) - y(d.y1); })
-          .style("fill", function(d: any) { return d.color });
+          bucket.selectAll("rect")
+            .data(function(d: any) { return d.sets; })
+            .enter()
+            .append("rect")
+            .attr("class", "set")
+            .attr("height", x.rangeBand())
+            .attr("x", function(d: any) { return y(d.y0); })
+            .attr("width", function(d: any) { return y(d.y1) - y(d.y0); })
+            .style("fill", function(d: any) { return d.color });
+        } else {
+          // Draw bars
+          var bucket = svg.selectAll(".bucket")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("class", "bucket")
+            .attr("transform", (d: any) => {
+              return this.translate(x(d.bucket), 0)
+            });
+
+          bucket.selectAll("rect")
+            .data(function(d: any) { return d.sets; })
+            .enter()
+            .append("rect")
+            .attr("class", "set")
+            .attr("width", x.rangeBand())
+            .attr("y", function(d: any) { return y(d.y1); })
+            .attr("height", function(d: any) { return y(d.y0) - y(d.y1); })
+            .style("fill", function(d: any) { return d.color });
+        }
 
         // Hover functionality
         if (this.hoverable) {
@@ -172,6 +232,21 @@ module flipp.mentat {
             tip.hide()
           });
         }
+      } else {
+        d3.select(this._element).select('svg')
+          .append("rect")
+          .attr("class", "overlay")
+          .attr("width", this.width)
+          .attr("height", this.height)
+          .attr("fill", "#f7f7f7")
+        d3.select(this._element).select('svg')
+          .append('text')
+          .text('No available data')
+          .attr('text-anchor', 'middle')
+          .attr("transform",
+            "translate(" + this.width / 2 + ", " + this.height / 2 + ")")
+          .attr('font-size', '24px')
+          .attr("fill", "#777777")
       }
     }
   }
@@ -179,6 +254,7 @@ module flipp.mentat {
   export interface BarsElement extends GraphElement {
     normalized: boolean;
     sorted: boolean;
+    vertical: boolean;
   }
 
   export var BarsElement = registerElement('f-bars', HTMLElement, Bars);

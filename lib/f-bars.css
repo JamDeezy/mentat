@@ -1,1 +1,1 @@
-f-bars{display:block;font:10px sans-serif;position:relative;overflow:hidden}f-bars .axis path,f-bars .axis line{fill:none;stroke:#000;shape-rendering:crispEdges}f-bars .axis path{display:none}
+f-bars{display:block;font:10px sans-serif;position:relative;overflow:visible}f-bars svg{overflow:visible !important}f-bars .axis path,f-bars .axis line{fill:none;stroke:#000;shape-rendering:crispEdges}f-bars .axis path{display:none}

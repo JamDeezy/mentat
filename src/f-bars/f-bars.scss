@@ -2,7 +2,11 @@ f-bars {
   display: block;
   font: 10px sans-serif;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+
+  svg {
+    overflow: visible !important;
+  }
 
   .axis path,
   .axis line {
