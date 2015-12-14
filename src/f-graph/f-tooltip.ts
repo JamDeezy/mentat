@@ -3,7 +3,7 @@
 
 module flipp.mentat {
   export class Tooltip {
-    private _node      : HTMLDivElement;
+    private _el        : HTMLElement;
     private _html      : (d: any) => string;
     private _offset    : Array<number> = [0, 0];
     private _direction : string = 'n';
@@ -11,25 +11,35 @@ module flipp.mentat {
 
     constructor(parent: d3.Selection<any>) {
       this._parent = parent;
-      this._appendTooltipNode();
+      this._appendTooltip();
       return this;
     }
 
     public show(v, d): Tooltip {
-      this._node.innerHTML = this._html(d);
-      this._node.style.left = (v[0] + this._offset[0]) + 'px'
-      this._node.style.top = (v[1] + this._offset[1]) + 'px';
-      this._node.style.opacity = '1';
+      this._el.innerHTML = this._html(d);
+      this._el.style.left = (v[0] + this._offset[0]) + 'px'
+      this._el.style.top = (v[1] + this._offset[1]) + 'px';
+      this._el.style.opacity = '1';
       return this;
     }
 
     public hide(): Tooltip {
-      this._node.style.opacity = '0';
+      this._el.style.opacity = '0';
       return this;
     }
 
     public offset(v): Tooltip {
       this._offset = v;
+      return this;
+    }
+
+    public style(a, v): Tooltip {
+      this._el.style[a] = v;
+      return this;
+    }
+
+    public attr(a, v): Tooltip {
+      this._el.setAttribute(a, v);
       return this;
     }
 
@@ -39,7 +49,7 @@ module flipp.mentat {
     }
 
     public remove() {
-      this._node.parentElement.removeChild(this._node);
+      this._el.parentElement.removeChild(this._el);
       return this;
     }
 
@@ -49,13 +59,13 @@ module flipp.mentat {
       return this;
     }
 
-    private _appendTooltipNode(): void {
-      this._node = document.createElement('div');
-      this._node.className = 'tooltip';
-      this._node.style.opacity = '0';
+    private _appendTooltip(): void {
+      this._el = document.createElement('div');
+      this._el.className = 'tooltip';
+      this._el.style.opacity = '0';
 
-      this._node.appendChild
-      document.body.appendChild(this._node);
+      this._el.appendChild
+      document.body.appendChild(this._el);
     }
   }
 }

@@ -4,6 +4,11 @@ the creation of machines in the human mind's image, just as the Spacing Guild
 and the Bene Gesserit took up similar functions.
 
 
+MENTAT
+======
+Componentized d3 library to consume large amounts of data into visualizations
+
+
 SETUP
 =====
 npm install
