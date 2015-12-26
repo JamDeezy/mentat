@@ -65,7 +65,7 @@ module flipp.mentat {
       this._el.style.opacity = '0';
 
       this._el.appendChild
-      document.body.appendChild(this._el);
+      if (document.body) document.body.appendChild(this._el);
     }
   }
 }

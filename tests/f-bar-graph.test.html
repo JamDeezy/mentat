@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <title>f-bar-graph</title>
+  <link rel="import" href="../lib/f-bar-graph.html">
+  <style>
+    body {
+      margin: 0;
+      padding: 10px;
+    }
+    div.demo {
+      background: #efefef;
+      vertical-align: top;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<h1>> f-bar-graph</h1>
+<div class="demo">
+  <f-bar-graph
+    size='{"width":800,"height":200}'
+    axes='{"x":"State", "y": ["A","B","C","D"]}'
+    sorted="true"
+    vertical="true"
+    normalized="true">
+  </f-bar-graph>
+  <f-bar-graph
+    size='{"width":800,"height":400}'
+    axes='{"x":"State", "y": ["A","B","C","D"]}'
+    sorted="true"
+    vertical="false">
+  </f-bar-graph>
+</div>
+</body>
+<script>
+  var data = [
+    {"State": "AL", "A": 310504, "B": 552339, "C": 259034, "D": 450818},
+    {"State": "AK", "A": 52083, "B": 85640, "C": 42153, "D": 74257},
+    {"State": "AZ", "A": 515910, "B": 828669, "C": 362642, "D": 601943},
+    {"State": "AR", "A": 202070, "B": 343207, "C": 157204, "D": 264160},
+    {"State": "CO", "A": 358280, "B": 587154, "C": 261701, "D": 466194},
+    {"State": "CT", "A": 211637, "B": 403658, "C": 196918, "D": 325110},
+    {"State": "DC", "A": 36352, "B": 50439, "C": 25225, "D": 75569},
+    {"State": "GA", "A": 740521, "B": 1250460, "C": 557860, "D": 919876},
+    {"State": "HI", "A": 87207, "B": 134025, "C": 64011, "D": 124834},
+    {"State": "ID", "A": 121746, "B": 201192, "C": 89702, "D": 147606},
+    {"State": "IN", "A": 443089, "B": 780199, "C": 361393, "D": 605863},
+    {"State": "IA", "A": 201321, "B": 345409, "C": 165883, "D": 306398},
+    {"State": "KS", "A": 202529, "B": 342134, "C": 155822, "D": 293114},
+    {"State": "KY", "A": 284601, "B": 493536, "C": 229927, "D": 381394},
+    {"State": "LA", "A": 310716, "B": 542341, "C": 254916, "D": 471275},
+    {"State": "MD", "A": 371787, "B": 651923, "C": 316873, "D": 543470},
+    {"State": "MA", "A": 383568, "B": 701752, "C": 341713, "D": 665879},
+    {"State": "MI", "A": 625526, "B": 1179503, "C": 585169, "D": 974480},
+    {"State": "MN", "A": 358471, "B": 606802, "C": 289371, "D": 507289},
+    {"State": "MS", "A": 220813, "B": 371502, "C": 174405, "D": 305964},
+    {"State": "MO", "A": 399450, "B": 690476, "C": 331543, "D": 560463}
+  ]
+
+  var graphs = document.querySelectorAll('f-bar-graph')
+  for (var i = 0; i < graphs.length; i++) {
+    graphs[i].load(data)
+    .render()
+  }
+</script>
+</html>

@@ -8,236 +8,183 @@ module flipp.mentat {
       super(_element);
     }
 
-    private _tip: Tooltip;
-
     createdCallback() {
       if (!this._el)
         LineGraph.call(this, this);
 
-      /* default hover content */
-      this.onHover((d: any) => {
-        var html = moment(d.date).format('YYYY-MM-DD') + ': ';
-        var tempy: any = this.axes.y
-        if (typeof this.axes.y === 'string') {
-          html += '<string>' + d[tempy] + '</string>';
-
-        } else if (this.axes.y instanceof Array) {
-          for (var i = 0; i < this.axes.y.length; i++) {
-            var data = d[this.axes.y[i]]
-            html += "<strong>" + this.axes.y[i] + "</strong>: " +
-              "<span style='color:red'>" + data + "</span><br>";
-          }
-        }
-        return html;
-      }).onDecode((d: any) => {
-        d.date =
-          d3.time
-            .format("%Y%m%d")
-            .parse(d[this.axes.x]);
-        return d;
-      })
-
-      this.render();
+      this.setup();
     }
 
-    detachedCallback() {
-      if (this._tip)
-        this._tip.remove();
-    }
-
-    public render(): LineGraphElement {
+    private setup() {
       this._el.innerHTML = '';
+
+      this.hoverFunc = function(data: any, axes: Graph.axes) {
+        var html = moment(data[axes.x]).format('YYYY-MM-DD') + ':<br>';
+        for (var i = 0; i < axes.y.length; i++)
+          html += "<strong>" + axes.y[i] + "</strong>: " +
+            "<span>" + data[axes.y[i]].y + "</span><br>";
+
+        return html;
+      }
+
+      this.decodeFunc = function(data: any, axes: Graph.axes) {
+        var dataSet = {}
+        for (var i = 0; i < axes.y.length; i++) {
+          var set = [];
+          for (var j = 0; j < data.length; j++) {
+            var item: any = {};
+            item.x = d3.time.format("%Y%m%d").parse(data[j][axes.x])
+            item.y = data[j][axes.y[i]];
+            set.push(item);
+          }
+          dataSet[axes.y[i]] = set;
+        }
+        return dataSet;
+      }
 
       var width = this.size.width - this.margin.left - this.margin.right;
       var height = this.size.height - this.margin.top - this.margin.bottom;
+      var colors = d3FlippColors(this.axes.y);
+      var svg = d3SvgBase(this._el, this.size, this.margin);
+      var tip = new Tooltip(svg)
+        .offset([20, 5])
+        .html((d: any) => { return this.hoverFunc(d, this.axes); })
+      this.tooltip = tip;
 
-      // typescript hack here, union types sucks
-      var tempy: any = this.axes.y
-      if (this.axes.y instanceof Array) {
-        var color = this.flatColor10().domain(tempy);
-      } else if (typeof this.axes.y === 'string') {
-        var color = this.flatColor10().domain([tempy]);
-      } else {
-        throw "Invalid axes.y type!";
-      }
+      /* Render cycle */
+      this.render = (): LineGraphElement =>  {
+        if (this.data && this.data.length > 0) {
+          /* Remove data overlay */
+          d3RemoveOverlay(svg);
+          svg.selectAll('*').remove();
 
-      var line =
-        d3.svg
-          .line()
-          .x(function(d: any)
-            { return x(d.date); })
-          .y(function(d: any)
-            { return y(d.value); });
+          /* Run through decode for each data point */
+          var dataSets = this.decodeFunc(this.data, this.axes);
+          var ext = Object.keys(dataSets).map((d) => { return dataSets[d] })
+          var dataDomain = d3TwoDExtend(ext, 'x')
+          var dataRange = [0, d3TwoDExtend(ext, 'y')[1]]
 
-      var svg =
-        d3.select(this._el)
-          .append("svg")
-          .attr("width", this.size.width)
-          .attr("height", this.size.height)
-        .append("g")
-          .attr("transform",
-            "translate(" + this.margin.left + "," + this.margin.top + ")");
+          /* XY scales */
+          var x = d3TimeScale([0, width], dataDomain)
+          var y = d3LinearScale([height, 0], dataRange)
 
-      if (this.data && this.data.length > 0) {
-        this.data.forEach((d: any) =>
-          { this.decodeFunc(d); });
-
-        this.data = this.data.sort((a: any, b: any) =>
-          { return a.date - b.date; });
-
-        var sets: any = color.domain().map((column) => {
-          return {
-            column: column,
-            values: this.data.map((d: any) =>
-              { return { date: d.date, value: +d[column], source: d }; })
-          }
-        });
-
-        var x =
-          d3.time
-            .scale()
-            .range([0, width])
-            .domain(
-              d3.extent(this.data, function(d: any)
-                { return d.date; })
+          /* XY axes */
+          svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0, " + height + ")")
+            .call(
+              d3Axis("bottom", x, {
+                ticks: (d3.time.daysTotal, 6),
+                tickSize: 40,
+                tickFormat: function(d) {
+                  return d3.time.format((d.getDate() < 7) ? "%b" : "%d")(d);
+                }
+              })
             );
 
-        var y =
-          d3.scale
-            .linear()
-            .range([height, 0])
-            .domain([0, 1.2 *
-              d3.max(sets, (c: any) => {
-                return d3.max(c.values, function(v: any)
-                  { return v.value; });
+          svg.append("g")
+            .attr("class", "y axis")
+            .call(
+              d3Axis("left", y, {
+                ticks: 4,
+                tickFormat: d3.format("s"),
+                tickPadding: 20,
+                tickSize: 0 - width
               })
-            ]);
+            );
 
-        var xAxis =
-          d3.svg
-            .axis()
-            .scale(x)
-            .orient("bottom")
-            .ticks(d3.time.daysTotal, 6)
-            .tickFormat(function(d): string {
-              if (d.getDate() < 7) {
-                return d3.time.format("%b")(d);
-              } else {
-                return d3.time.format("%d")(d)
-              }
-            })
-            .tickSize(40);
+          /* Line plotting function */
+          var line =
+            d3.svg
+              .line()
+              .x(function(d: any) { return x(d.x); })
+              .y(function(d: any) { return y(d.y); });
 
-        var yAxis =
-          d3.svg
-            .axis()
-            .scale(y)
-            .orient("left")
-            .ticks(4)
-            .tickFormat(d3.format("s"))
-            .tickPadding(20)
-            .tickSize(0 - width);
-
-        svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0, " + height + ")")
-          .call(xAxis);
-
-        svg.append("g")
-          .attr("class", "y axis")
-          .call(yAxis);
-
-        var set =
-          svg.selectAll(".set")
-            .data(sets)
-            .enter()
-            .append("g")
-            .attr("class", "set");
-
-        set.append("path")
-          .attr("class", "line")
-          .attr("d", function(d: any)
-            { return line(d.values); })
-          .style("stroke", function(d: any)
-            { return color(d.column); });
-
-        if (this.hoverFunc) {
-          var scanner =
+          /* Create sets of lines */
+          for (var key in dataSets) {
             svg.append("g")
-              .attr("class", "scanner")
-              .style("display", "none");
+              .attr("class", "set")
+              .append("path")
+              .attr("class", "line")
+              .style("stroke", colors(key))
+              .transition()
+              .duration(2000)
+              .attrTween("d", timeInterpolation(dataSets[key], line));
+          }
 
-          scanner.append("line")
-            .style("stroke-dasharray", ("3, 3"))
-            .attr("y1", 0)
-            .attr("y2", height);
+          /* Hover functionality */
+          if (this.hoverFunc) {
+            var scanner =
+              svg.append("g")
+                .attr("class", "scanner")
+                .style("display", "none");
 
-          var point =
-            scanner.append("circle")
-              .style("fill", "steelblue")
-              .attr("r", 4);
+            scanner.append("line")
+              .style("stroke-dasharray", ("3, 3"))
+              .attr("y1", 0)
+              .attr("y2", height);
 
-          if (this._tip)
-            this._tip.remove();
+            var point =
+              scanner.append("circle")
+                .style("fill", "steelblue")
+                .attr("r", 4);
 
-          var tip = new Tooltip(svg)
-            .offset([20, 5])
-            .html((d: any) =>
-              { return this.hoverFunc(d.source); })
-          this._tip = tip;
+            var requiredData = this.axes.y
 
-          svg.append("rect")
-            .attr("class", "overlay")
-            .attr("width", width + 10)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("pointer-events", "all")
-            .on("mouseout", function() {
-              scanner.style("display", "none");
-              tip.hide();
-            })
-            .on("mousemove", function() {
-              var date: any = x.invert(d3.mouse(this)[0]);
-              var i =
-                d3.bisector((d: any) => { return d.date; })
-                  .left(sets[0].values, date, 1);
-              var d0 = sets[0].values[i - 1];
-              var d1 = sets[0].values[i];
+            svg.append("rect")
+                .attr("class", "overlay")
+                .attr("width", width)
+                .attr("height", height)
+                .style("fill", "none")
+                .style("pointer-events", "all")
+                .on("mouseout", function() {
+                    scanner.style("display", "none");
+                    tip.hide();
+                })
+                .on("mousemove", function() {
+                  var datapoint = {}
+                  var val: any = x.invert(d3.mouse(this)[0]);
 
-              // find closest datapoint
-              if (!d1) var d = d0
-              else if (!d0) var d = d1
-              else var d = date - d0.date > d1.date - date ? d1 : d0;
+                  // construct data point on where our mouse is hovering
+                  for (var i = 0; i < requiredData.length; i++) {
+                    var curSet = dataSets[requiredData[i]]
+                    var index =
+                      d3.bisector((d: any) => { return d.x; })
+                        .left(curSet, val, 1);
+                    var d0 = curSet[index-1];
+                    var d1 = curSet[index];
 
-              scanner.style("display", null)
-                .attr("transform", "translate(" + x(d.date) + ", 0)");
-              point.attr("transform", "translate(0, " + y(d.value) + ")")
+                    // find closest datapoint
+                    datapoint[requiredData[i]] =
+                      val - d0.x > d1.x - val ? d1 : d0;
+                  }
 
-              var pointEl: any = point[0][0]
-              var position = pointEl.getBoundingClientRect();
-              tip.show([position.left, position.top], d);
-            })
+                  scanner.style("display", null)
+                    .attr("transform", "translate(" +
+                      x(datapoint[requiredData[0]].x) + ", 0)");
+                  point.attr("transform", "translate(0, " +
+                    y(datapoint[requiredData[0]].y) + ")")
+
+                  var pointEl: any = point[0][0]
+                  var position = pointEl.getBoundingClientRect();
+                  tip.show([
+                    position.left + window.scrollX,
+                    position.top + window.scrollY
+                  ], datapoint);
+                })
+          }
+
+        } else {
+          /* Data overlay */
+          d3ZeroOverlay(svg)
         }
-      } else {
-        d3.select(this._element)
-          .select('svg')
-          .append("rect")
-          .attr("class", "overlay")
-          .attr("width", this.size.width)
-          .attr("height", this.size.height)
-          .attr("fill", "#f7f7f7")
 
-        d3.select(this._element)
-          .select('svg')
-          .append('text')
-          .text('No available data')
-          .attr('text-anchor', 'middle')
-          .attr("transform", "translate(" +
-            this.size.width / 2 + ", " + this.size.height / 2 + ")")
-          .attr('font-size', '24px')
-          .attr("fill", "#777777")
-      }
+        return this._el;
+      } /* Render cycle end */
+    };
 
+    /* Stub */
+    public render(): LineGraphElement {
       return this._el;
     }
   }

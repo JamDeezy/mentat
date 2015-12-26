@@ -1,5 +1,7 @@
 /// <reference path="../f-mentat.ts"/>
+/// <reference path="f-tooltip.ts"/>
 /// <reference path="f-d3-helper.ts"/>
+
 
 module flipp.mentat {
   export declare module Graph {
@@ -21,12 +23,34 @@ module flipp.mentat {
     }
   }
 
+
+  export interface GraphElement extends HTMLElement {
+    data: any;
+    axes: Graph.axes;
+    margin: Graph.margin;
+    size: number[];
+    attr(attr: string, value: any): GraphElement;
+    load(data: any): GraphElement;
+    onClick(func: (data: any, axes?: Graph.axes) => string): GraphElement;
+    onDecode(func: (data: any, axes?: Graph.axes) => any): GraphElement;
+    onHover(func: (data: any, axes?: Graph.axes) => string): GraphElement;
+    render(): GraphElement;
+    update(hash: any): GraphElement;
+  }
+
+
   export abstract class Graph {
     constructor(protected _el: GraphElement) { }
+    detachedCallback() { if (this.tooltip) this.tooltip.remove() }
 
   /* Attributes */
     get axes(): Graph.axes {
-      return JSON.parse(this._el.getAttribute('axes')) || Graph.AXES;
+      // XXX - this may require some rework
+      var axes = JSON.parse(this._el.getAttribute('axes')) || Graph.AXES;
+      if (typeof axes.y === 'string')
+        return {x: axes.x, y: [axes.y]}
+      else
+        return axes
     }
     get margin(): Graph.margin {
       return JSON.parse(this._el.getAttribute('margin')) || Graph.MARGIN;
@@ -47,9 +71,10 @@ module flipp.mentat {
 
 
   /* Public */
-    public clickFunc: ((d: any) => string);
-    public hoverFunc: ((d: any) => string);
-    public decodeFunc: ((d: any) => any);
+    public clickFunc: ((data: any, axes?: Graph.axes) => string);
+    public hoverFunc: ((data: any, axes?: Graph.axes) => string);
+    public decodeFunc: ((data: any, axes?: Graph.axes) => any);
+    public tooltip: Tooltip;
     public data: any;
 
     public attr(attr: string, value: any): GraphElement {
@@ -60,41 +85,31 @@ module flipp.mentat {
       return this._el;
     }
 
-    public load(data: any): GraphElement {
-      switch (typeof data) {
-        // pass of array of objects
-        case 'object':
-          this.data = data;
-          break;
-
-        // pass of url or csv string
-        case 'string':
-          this.data = d3.csv.parse(data);
-          break;
-
-        // not supported
-        default:
-          console.error("Invalid data type!");
-      }
+    public load(data: any[]): GraphElement {
+      this.data = data;
       return this._el;
     }
 
-    public onClick(func: (d: any) => string): GraphElement {
+    public onClick(
+      func: (data: any, axes?: Graph.axes) => string): GraphElement {
+
       this.clickFunc = func;
       return this._el;
     }
 
-    public onDecode(func: (d: any) => any): GraphElement {
+    public onDecode(
+      func: (data: any, axes?: Graph.axes) => any): GraphElement {
+
       this.decodeFunc = func;
       return this._el;
     }
 
-    public onHover(func: (d: any) => string): GraphElement {
+    public onHover(
+      func: (data: any, axes?: Graph.axes) => string): GraphElement {
+
       this.hoverFunc = func;
       return this._el;
     }
-
-    public abstract render(): GraphElement;
 
     public update(hash: any): GraphElement {
       for (var key in hash)
@@ -105,39 +120,13 @@ module flipp.mentat {
       return this._el;
     }
 
+    public abstract render(): GraphElement;
+
 
   /* Protected */
     protected static MARGIN = { top: 20, right: 0, bottom: 70, left: 55 };
     protected static SIZE = { width: 960, height: 480 };
     protected static AXES = { x: 'key', y: 'value' }
-
-    protected flatColor10(): d3.scale.Ordinal<any, any> {
-      return d3.scale.ordinal().range([
-        "#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
-        "#e74c3c", "#9b59b6", "#ecf0f1", "#95a5a6", "#34495e"
-      ]);
-    }
-
-    protected fallColor7(): d3.scale.Ordinal<any, any> {
-      return d3.scale.ordinal().range([
-        "#98abc5", "#8a89a6", "#7b6888", "#6b486b",
-        "#a05d56", "#d0743c", "#ff8c00"
-      ]);
-    }
-  }
-
-  export interface GraphElement extends HTMLElement {
-    data                             : any;
-    axes                             : Graph.axes;
-    margin                           : Graph.margin;
-    size                             : number[];
-    attr(attr: string, value: any)   : GraphElement;
-    load(data: any)                  : GraphElement;
-    onClick(func: (d: any) => string): GraphElement;
-    onDecode(func: (d: any) => any)  : GraphElement;
-    onHover(func: (d: any) => string): GraphElement;
-    render()                         : GraphElement;
-    update(hash: any)                : GraphElement;
   }
 
   export var GraphElement = registerElement('f-graph', HTMLElement, Graph);
