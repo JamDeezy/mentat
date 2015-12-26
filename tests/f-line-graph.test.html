@@ -20,13 +20,79 @@
 <div class="demo">
   <f-line-graph
     size='{ "width": 800, "height": 400 }'
-    axes='{ "x": "date", "y": "New York" }'
+    axes='{ "x": "date", "y": ["New York", "San Francisco", "Austin"] }'
   ></f-line-graph>
 </div>
 </body>
 <script>
+
+  var data = [
+    { "date":"20111001","New York":63.4,"San Francisco":62.7,"Austin":72.2 },
+    { "date":"20111002","New York":58,"San Francisco":59.9,"Austin":67.7 },
+    { "date":"20111003","New York":53.3,"San Francisco":59.1,"Austin":69.4 },
+    { "date":"20111004","New York":55.7,"San Francisco":58.8,"Austin":68 },
+    { "date":"20111005","New York":64.2,"San Francisco":58.7,"Austin":72.4 },
+    { "date":"20111006","New York":58.8,"San Francisco":57,"Austin":77 },
+    { "date":"20111007","New York":57.9,"San Francisco":56.7,"Austin":82.3 },
+    { "date":"20111008","New York":61.8,"San Francisco":56.8,"Austin":78.9 },
+    { "date":"20111009","New York":69.3,"San Francisco":56.7,"Austin":68.8 },
+    { "date":"20111010","New York":71.2,"San Francisco":60.1,"Austin":68.7 },
+    { "date":"20111011","New York":68.7,"San Francisco":61.1,"Austin":70.3 },
+    { "date":"20111012","New York":61.8,"San Francisco":61.5,"Austin":75.3 },
+    { "date":"20111013","New York":63,"San Francisco":64.3,"Austin":76.6 },
+    { "date":"20111014","New York":66.9,"San Francisco":67.1,"Austin":66.6 },
+    { "date":"20111015","New York":61.7,"San Francisco":64.6,"Austin":68 },
+    { "date":"20111016","New York":61.8,"San Francisco":61.6,"Austin":70.6 },
+    { "date":"20111017","New York":62.8,"San Francisco":61.1,"Austin":71.1 },
+    { "date":"20111018","New York":60.8,"San Francisco":59.2,"Austin":70 },
+    { "date":"20111019","New York":62.1,"San Francisco":58.9,"Austin":61.6 },
+    { "date":"20111020","New York":65.1,"San Francisco":57.2,"Austin":57.4 },
+    { "date":"20111021","New York":55.6,"San Francisco":56.4,"Austin":64.3 },
+    { "date":"20111022","New York":54.4,"San Francisco":60.7,"Austin":72.4 },
+    { "date":"20111023","New York":54.4,"San Francisco":65.1,"Austin":72.4 },
+    { "date":"20111024","New York":54.8,"San Francisco":60.9,"Austin":72.5 },
+    { "date":"20111025","New York":57.9,"San Francisco":56.1,"Austin":72.7 },
+    { "date":"20111026","New York":54.6,"San Francisco":54.6,"Austin":73.4 },
+    { "date":"20111027","New York":54.4,"San Francisco":56.1,"Austin":70.7 },
+    { "date":"20111028","New York":42.5,"San Francisco":58.1,"Austin":56.8 },
+    { "date":"20111029","New York":40.9,"San Francisco":57.5,"Austin":51 },
+    { "date":"20111030","New York":38.6,"San Francisco":57.7,"Austin":54.9 },
+    { "date":"20111031","New York":44.2,"San Francisco":55.1,"Austin":58.8 },
+    { "date":"20111101","New York":49.6,"San Francisco":57.9,"Austin":62.6 },
+    { "date":"20111102","New York":47.2,"San Francisco":64.6,"Austin":71 },
+    { "date":"20111103","New York":50.1,"San Francisco":56.2,"Austin":58.4 },
+    { "date":"20111104","New York":50.1,"San Francisco":50.5,"Austin":45.1 },
+    { "date":"20111105","New York":43.5,"San Francisco":51.3,"Austin":52.2 },
+    { "date":"20111106","New York":43.8,"San Francisco":52.6,"Austin":73 },
+    { "date":"20111107","New York":48.9,"San Francisco":51.4,"Austin":75.4 },
+    { "date":"20111108","New York":55.5,"San Francisco":50.6,"Austin":72.1 },
+    { "date":"20111109","New York":53.7,"San Francisco":54.6,"Austin":56.6 },
+    { "date":"20111110","New York":57.7,"San Francisco":55.6,"Austin":55.4 },
+    { "date":"20111111","New York":48.5,"San Francisco":53.9,"Austin":46.7 },
+    { "date":"20111112","New York":46.8,"San Francisco":54,"Austin":62 },
+    { "date":"20111113","New York":51.1,"San Francisco":53.8,"Austin":71.6 },
+    { "date":"20111114","New York":56.8,"San Francisco":53.5,"Austin":75.5 },
+    { "date":"20111115","New York":59.7,"San Francisco":53.4,"Austin":72.1 },
+    { "date":"20111116","New York":56.5,"San Francisco":52.2,"Austin":65.7 },
+    { "date":"20111117","New York":49.6,"San Francisco":52.7,"Austin":56.8 },
+    { "date":"20111118","New York":41.5,"San Francisco":53.1,"Austin":49.9 },
+    { "date":"20111119","New York":44.3,"San Francisco":49,"Austin":71.7 },
+    { "date":"20111120","New York":54,"San Francisco":50.4,"Austin":77.7 },
+    { "date":"20111121","New York":54.1,"San Francisco":51.1,"Austin":76.4 },
+    { "date":"20111122","New York":49.4,"San Francisco":52.3,"Austin":68.8 },
+    { "date":"20111123","New York":50,"San Francisco":54.6,"Austin":57 },
+    { "date":"20111124","New York":44,"San Francisco":55.1,"Austin":55.5 },
+    { "date":"20111125","New York":50.3,"San Francisco":51.5,"Austin":61.6 },
+    { "date":"20111126","New York":52.1,"San Francisco":53.6,"Austin":64.1 },
+    { "date":"20111127","New York":49.6,"San Francisco":52.3,"Austin":51.1 },
+    { "date":"20111128","New York":57.2,"San Francisco":51,"Austin":43 },
+    { "date":"20111129","New York":59.1,"San Francisco":49.5,"Austin":46.4 },
+    { "date":"20111130","New York":50.6,"San Francisco":49.8,"Austin":48 }
+  ]
+
+  var arr = ['New York', 'San Francisco', 'Austin'];
   document.querySelector('f-line-graph')
-    .load("date,New York,San Francisco,Austin\n20111001,63.4,62.7,72.2\n20111002,58.0,59.9,67.7\n20111003,53.3,59.1,69.4\n20111004,55.7,58.8,68.0\n20111005,64.2,58.7,72.4\n20111006,58.8,57.0,77.0\n20111007,57.9,56.7,82.3\n20111008,61.8,56.8,78.9\n20111009,69.3,56.7,68.8\n20111010,71.2,60.1,68.7\n20111011,68.7,61.1,70.3\n20111012,61.8,61.5,75.3\n20111013,63.0,64.3,76.6\n20111014,66.9,67.1,66.6\n20111015,61.7,64.6,68.0\n20111016,61.8,61.6,70.6\n20111017,62.8,61.1,71.1\n20111018,60.8,59.2,70.0\n20111019,62.1,58.9,61.6\n20111020,65.1,57.2,57.4\n20111021,55.6,56.4,64.3\n20111022,54.4,60.7,72.4\n20111023,54.4,65.1,72.4\n20111024,54.8,60.9,72.5\n20111025,57.9,56.1,72.7\n20111026,54.6,54.6,73.4\n20111027,54.4,56.1,70.7\n20111028,42.5,58.1,56.8\n20111029,40.9,57.5,51.0\n20111030,38.6,57.7,54.9\n20111031,44.2,55.1,58.8\n20111101,49.6,57.9,62.6\n20111102,47.2,64.6,71.0\n20111103,50.1,56.2,58.4\n20111104,50.1,50.5,45.1\n20111105,43.5,51.3,52.2\n20111106,43.8,52.6,73.0\n20111107,48.9,51.4,75.4\n20111108,55.5,50.6,72.1\n20111109,53.7,54.6,56.6\n20111110,57.7,55.6,55.4\n20111111,48.5,53.9,46.7\n20111112,46.8,54.0,62.0\n20111113,51.1,53.8,71.6\n20111114,56.8,53.5,75.5\n20111115,59.7,53.4,72.1\n20111116,56.5,52.2,65.7\n20111117,49.6,52.7,56.8\n20111118,41.5,53.1,49.9\n20111119,44.3,49.0,71.7\n20111120,54.0,50.4,77.7\n20111121,54.1,51.1,76.4\n20111122,49.4,52.3,68.8\n20111123,50.0,54.6,57.0\n20111124,44.0,55.1,55.5\n20111125,50.3,51.5,61.6\n20111126,52.1,53.6,64.1\n20111127,49.6,52.3,51.1\n20111128,57.2,51.0,43.0\n20111129,59.1,49.5,46.4\n20111130,50.6,49.8,48.0")
+    .load(data)
     .render()
 </script>
 </html>

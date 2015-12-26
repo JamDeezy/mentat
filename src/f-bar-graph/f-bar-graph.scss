@@ -18,4 +18,9 @@ f-bar-graph {
   .axis path {
     display: none;
   }
+
+  .axis text {
+    font-size: 12px;
+    font-weight: bold;
+  }
 }
