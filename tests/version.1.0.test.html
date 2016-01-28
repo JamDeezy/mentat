@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+  <title>Version 1.0 Playground</title>
+  <script src="../lib/mentat.js"></script>
+  <script src="tableData.js"></script>
+  <link rel="import" href="../vendors/d3.min.html">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-rc.1/angular.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/paper/bootstrap.min.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid black;
+    }
+
+    table thead tr th {
+      background: #ddd;
+      text-align: center;
+      padding: 0 5px;
+      cursor: pointer;
+    }
+
+    table tbody tr td {
+      padding: 0 5px;
+    }
+  </style>
+</head>
+<body ng-app="playground">
+  <h1>Version 1.0 playground</h1>
+  <div ng-controller="tblCtrl">
+    <div id="table"></div>
+  </div>
+  <br>
+  <div ng-controller="graphCtrl">
+    <div id="line"></div>
+  </div>
+</body>
+<script>
+  angular
+    .module('playground', [])
+    .controller('tblCtrl', function($scope) {
+      $scope.body = {
+        breadcrumbs: [],
+        data: data,
+        dimension: 'date',
+        dimensionOrder: ['date', 'flyer_run_name', 'channel', 'device']
+      };
+
+      $scope.createTable = function() {
+        var start = new Date;
+
+        document.querySelector('#table').innerHTML = '';
+
+        table = mentat.table({
+          selector: '#table',
+          paginate: true,
+          rows: {
+            0: "total"
+          },
+          cols: {
+            0: $scope.drillDownHtml,
+            1: d3.format("3,f"),
+            2: d3.format("3,f"),
+            3: d3.format("3,f"),
+            4: d3.format("3,.2f"),
+            5: d3.format("3,f")
+          },
+          keys: [$scope.body.dimension],
+          headers: [
+            $scope.body.dimension,
+            'impressions',
+            'opens',
+            'engaged_visits',
+            'page_views',
+            'clicks'
+          ],
+          data: $scope.body.data
+        }).sort(0, false);
+
+        console.log(
+          'mentat.table took ' +
+          (new Date-start)/1000 +
+          ' seconds.');
+      }
+
+      $scope.drillDownHtml = function(data) {
+        var node = document.createElement('td');
+        node.innerHTML = data;
+        node.onclick = $scope.drillDownCallback;
+
+        return node;
+      }
+
+      $scope.drillDownCallback = function() {
+        var filterKey = this.innerHTML;
+        var filterData = []
+        for (var i = 0; i < $scope.body.data.length; i++) {
+          if ($scope.body.data[i][$scope.body.dimension] == filterKey) {
+            filterData.push($scope.body.data[i]);
+          }
+        }
+
+        var nextDimensionIndex =
+          $scope
+            .body
+            .dimensionOrder
+            .indexOf($scope.body.dimension) + 1;
+
+        $scope.body.dimension =
+          $scope
+            .body
+            .dimensionOrder[nextDimensionIndex];
+
+        $scope.body.data = filterData;
+        $scope.createTable();
+      }
+
+      $scope.createTable();
+    })
+
+</script>
+</html>

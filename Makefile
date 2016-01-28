@@ -7,31 +7,31 @@ VULCANIZE  := node_modules/.bin/vulcanize
 SRC_PATH   := src
 LIB_PATH   := lib
 
-# sources n destination files
-SASS_SRC := $(shell find $(SRC_PATH)/*/* -type f \
-	          -name "*.scss")
-SASS_DST := $(addprefix $(LIB_PATH)/, \
-				    $(notdir $(SASS_SRC:.scss=.css)))
+# # sources n destination files
+# SASS_SRC := $(shell find $(SRC_PATH)/*/* -type f \
+# 	          -name "*.scss")
+# SASS_DST := $(addprefix $(LIB_PATH)/, \
+# 				    $(notdir $(SASS_SRC:.scss=.css)))
 
-HANDLEBARS_SRC := $(shell find $(SRC_PATH)/*/* -type f \
-									-name "*.handlebars")
-HANDLEBARS_DST := $(addprefix $(LIB_PATH)/, \
-									$(notdir $(HANDLEBARS_SRC:.handlebars=.handlebars.js)))
+# HANDLEBARS_SRC := $(shell find $(SRC_PATH)/*/* -type f \
+# 									-name "*.handlebars")
+# HANDLEBARS_DST := $(addprefix $(LIB_PATH)/, \
+# 									$(notdir $(HANDLEBARS_SRC:.handlebars=.handlebars.js)))
 
-TYPESCRIPT_SRC := $(shell find $(SRC_PATH)/*/* -type f \
-									-regex "^.*[^\.d\]\.ts$$")
-TYPESCRIPT_DST := $(addprefix $(LIB_PATH)/, \
-									$(notdir $(TYPESCRIPT_SRC:.ts=.js)))
+# TYPESCRIPT_SRC := $(shell find $(SRC_PATH)/*/* -type f \
+# 									-regex "^.*[^\.d\]\.ts$$")
+# TYPESCRIPT_DST := $(addprefix $(LIB_PATH)/, \
+# 									$(notdir $(TYPESCRIPT_SRC:.ts=.js)))
 
-OTHER_SRC := $(shell find $(SRC_PATH)/*/* -type f \
-						 -name "*.html" -or -name "*.js" -or \
-					 	 -name "*.png" -or -name "*.svg" -or \
-						 -name "*.json" -or -name "*.ico" -or \
-						 -name "*.css" -or -name "*.woff")
-OTHER_DST := $(addprefix $(LIB_PATH)/, $(notdir $(OTHER_SRC)))
+# OTHER_SRC := $(shell find $(SRC_PATH)/*/* -type f \
+# 						 -name "*.html" -or -name "*.js" -or \
+# 					 	 -name "*.png" -or -name "*.svg" -or \
+# 						 -name "*.json" -or -name "*.ico" -or \
+# 						 -name "*.css" -or -name "*.woff")
+# OTHER_DST := $(addprefix $(LIB_PATH)/, $(notdir $(OTHER_SRC)))
 
-OUTPUT_FILES := $(SASS_DST) $(HANDLEBARS_DST) $(TYPESCRIPT_DST) $(OTHER_DST)
-OUTPUT_HTML := ../f-mentat.html
+# OUTPUT_FILES := $(SASS_DST) $(HANDLEBARS_DST) $(TYPESCRIPT_DST) $(OTHER_DST)
+# OUTPUT_HTML := ../f-mentat.html
 
 # options
 default: $(OUTPUT_FILES)
@@ -80,3 +80,11 @@ f-mentat.min.html: $(OUTPUT_FILES)
 	@echo ">>> f-mentat.min.html"
 	@$(MINIFIER) --collapse-whitespace --lint --minify-js \
 							 --minify-css f-mentat.html > f-mentat.min.html
+
+# Custom make rule for typescript
+$(LIB_PATH)/%.js: $(SRC_PATH)/%.ts
+	@echo $<
+	@$(TYPESCRIPT) $^ --out $@ -t ES5
+
+lib/mentat.js: src/*.ts
+	@$(TYPESCRIPT) src/*.ts --out $@ -t ES5
