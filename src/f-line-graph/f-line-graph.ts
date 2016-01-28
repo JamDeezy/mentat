@@ -108,7 +108,7 @@ module flipp.mentat {
               .attr("class", "line")
               .style("stroke", colors(key))
               .transition()
-              .duration(2000)
+              .duration(1000)
               .attrTween("d", timeInterpolation(dataSets[key], line));
           }
 

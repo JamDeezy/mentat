@@ -140,7 +140,7 @@ module flipp.mentat {
             .call(
               d3Axis((this.vertical) ? 'top' : 'left', y, {
                 ticks: 4,
-                tickFormat: d3.format("s"),
+                tickFormat: (this.normalized) ? d3.format("%") : d3.format("s"),
                 ticketSize: 0 - width
               })
             );
@@ -187,14 +187,14 @@ module flipp.mentat {
               };
               if (this.vertical) {
                 selection.transition()
-                  .duration(500)
+                  .duration(250)
                   .delay(function(d, i) { return i * 40 })
                   .attr("x", (d) => {
                     return (this.normalized) ? y(d.y0 / d.total) : y(d.y0); })
                   .attr("width", barHeight)
               } else {
                 selection.transition()
-                  .duration(500)
+                  .duration(250)
                   .delay(function(d, i) { return i * 40 })
                   .attr("y", (d) => {
                     return (this.normalized) ? y(d.y0 / d.total) : y(d.y0); })
