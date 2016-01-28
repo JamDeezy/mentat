@@ -46,6 +46,9 @@ module flipp.mentat {
       var height = this.size.height - this.margin.top - this.margin.bottom;
       var colors = d3FlippColors(this.axes.y);
       var svg = d3SvgBase(this._el, this.size, this.margin);
+      svg.attr("transform", "translate(" +
+        this.margin.left + "," + this.margin.top + ")")
+
       var tip = new Tooltip(svg)
         .offset([20, 5])
         .html((d: any) => { return this.hoverFunc(d, this.axes); })
@@ -68,17 +71,26 @@ module flipp.mentat {
           var x = d3TimeScale([0, width], dataDomain)
           var y = d3LinearScale([height, 0], dataRange)
 
+          var customTimeFormat = d3.time.format.multi([
+            [".%L", function(d) { return d.getMilliseconds(); }],
+            [":%S", function(d) { return d.getSeconds(); }],
+            ["%I:%M", function(d) { return d.getMinutes(); }],
+            ["%I %p", function(d) { return d.getHours(); }],
+            ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+            ["%b %d", function(d) { return d.getDate() != 1; }],
+            ["%B", function(d) { return d.getMonth(); }],
+            ["%Y", function() { return true; }]
+          ]);
+
           /* XY axes */
           svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0, " + height + ")")
             .call(
               d3Axis("bottom", x, {
-                ticks: (d3.time.daysTotal, 6),
+                ticks: 6,
                 tickSize: 40,
-                tickFormat: function(d) {
-                  return d3.time.format((d.getDate() < 7) ? "%b" : "%d")(d);
-                }
+                tickFormat: customTimeFormat
               })
             );
 
@@ -108,7 +120,7 @@ module flipp.mentat {
               .attr("class", "line")
               .style("stroke", colors(key))
               .transition()
-              .duration(2000)
+              .duration(1000)
               .attrTween("d", timeInterpolation(dataSets[key], line));
           }
 
@@ -168,8 +180,8 @@ module flipp.mentat {
                   var pointEl: any = point[0][0]
                   var position = pointEl.getBoundingClientRect();
                   tip.show([
-                    position.left + window.scrollX,
-                    position.top + window.scrollY
+                    position.left + window.pageXOffset,
+                    position.top + window.pageYOffset
                   ], datapoint);
                 })
           }

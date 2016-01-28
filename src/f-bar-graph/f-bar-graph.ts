@@ -83,7 +83,15 @@ module flipp.mentat {
                 dataSets[a][dataSets[a].length - 1].y1
             });
           } else {
-            dataDomain = Object.keys(dataSets).sort();
+            if (Object.keys(dataSets)[0].match(/^\w+\s\w+\s\d+$/)) {
+              dataDomain = Object.keys(dataSets).sort(function(a, b) {
+                // Fuck you firefox
+                return moment("2015 " + a.replace(/^\w+\s/, ''))
+                  .isAfter("2015 " + b.replace(/^\w+\s/, '')) ? 1 : -1;
+              });
+            } else {
+              dataDomain = Object.keys(dataSets).sort()
+            }
           }
           var dataRange = [0, d3TwoDExtend(ext, 'y1')[1]];
 
@@ -140,8 +148,8 @@ module flipp.mentat {
             .call(
               d3Axis((this.vertical) ? 'top' : 'left', y, {
                 ticks: 4,
-                tickFormat: d3.format("s"),
-                ticketSize: 0 - width
+                tickFormat: (this.normalized) ? d3.format("%") : d3.format("s"),
+                tickSize: (this.vertical) ? 0 - width : 0
               })
             );
 
@@ -187,14 +195,14 @@ module flipp.mentat {
               };
               if (this.vertical) {
                 selection.transition()
-                  .duration(500)
+                  .duration(250)
                   .delay(function(d, i) { return i * 40 })
                   .attr("x", (d) => {
                     return (this.normalized) ? y(d.y0 / d.total) : y(d.y0); })
                   .attr("width", barHeight)
               } else {
                 selection.transition()
-                  .duration(500)
+                  .duration(250)
                   .delay(function(d, i) { return i * 40 })
                   .attr("y", (d) => {
                     return (this.normalized) ? y(d.y0 / d.total) : y(d.y0); })
@@ -213,8 +221,8 @@ module flipp.mentat {
                 datapoint[key] = dataSets[key]
 
                 tip.show([
-                  position.left + window.scrollX,
-                  position.top + window.scrollY
+                  position.left + window.pageXOffset,
+                  position.top + window.pageYOffset
                 ], datapoint);
               }).on("mouseleave", function() {
                 tip.hide()
