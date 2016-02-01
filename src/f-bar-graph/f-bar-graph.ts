@@ -141,7 +141,7 @@ module flipp.mentat {
               d3Axis((this.vertical) ? 'top' : 'left', y, {
                 ticks: 4,
                 tickFormat: (this.normalized) ? d3.format("%") : d3.format("s"),
-                ticketSize: 0 - width
+                tickSize: (this.vertical) ? 0 - width : 0
               })
             );
 
