@@ -124,7 +124,7 @@ module flipp.mentat {
 
 
   /* Protected */
-    protected static MARGIN = { top: 20, right: 0, bottom: 70, left: 55 };
+    protected static MARGIN = { top: 20, right: 10, bottom: 70, left: 55 };
     protected static SIZE = { width: 960, height: 480 };
     protected static AXES = { x: 'key', y: 'value' }
   }

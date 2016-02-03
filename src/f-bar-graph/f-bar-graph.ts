@@ -83,7 +83,13 @@ module flipp.mentat {
                 dataSets[a][dataSets[a].length - 1].y1
             });
           } else {
-            dataDomain = Object.keys(dataSets).sort();
+            if (Object.keys(dataSets)[0].match(/^\w+\s\w+\s\d+$/)) {
+              dataDomain = Object.keys(dataSets).sort(function(a, b) {
+                return Date.parse(a) - Date.parse(b);
+              });
+            } else {
+              dataDomain = Object.keys(dataSets).sort()
+            }
           }
           var dataRange = [0, d3TwoDExtend(ext, 'y1')[1]];
 

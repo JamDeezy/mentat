@@ -64,4 +64,18 @@ module flipp.mentat {
   export function getChild(parent: HTMLElement, selector: string): any {
     return parent.querySelector(selector);
   }
+
+  export function sortAlphaNum(a, b) {
+    var reA = /[^a-zA-Z]/g;
+    var reN = /[^0-9]/g;
+    var aA = a.replace(reA, "");
+    var bA = b.replace(reA, "");
+    if (aA === bA) {
+      var aN = parseInt(a.replace(reN, ""), 10);
+      var bN = parseInt(b.replace(reN, ""), 10);
+      return aN === bN ? 0 : aN > bN ? 1 : -1;
+    } else {
+      return aA > bA ? 1 : -1;
+    }
+  }
 }
