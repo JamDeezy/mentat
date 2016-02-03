@@ -20,6 +20,7 @@ TODO
 get rid of handlebars and web components
 create tables and graphs
 standardize customization
+standard css stylesheet
 
 CHANGELOG
 =====

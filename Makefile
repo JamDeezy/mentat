@@ -7,6 +7,7 @@ VULCANIZE  := node_modules/.bin/vulcanize
 SRC_PATH   := src
 LIB_PATH   := lib
 
+MENTAT_SRC := src/chart.ts src/mentat.ts src/table.ts
 # # sources n destination files
 # SASS_SRC := $(shell find $(SRC_PATH)/*/* -type f \
 # 	          -name "*.scss")
@@ -86,5 +87,5 @@ $(LIB_PATH)/%.js: $(SRC_PATH)/%.ts
 	@echo $<
 	@$(TYPESCRIPT) $^ --out $@ -t ES5
 
-lib/mentat.js: src/*.ts
-	@$(TYPESCRIPT) src/*.ts --out $@ -t ES5
+lib/mentat.js: $(MENTAT_SRC)
+	@$(TYPESCRIPT) $(MENTAT_SRC) --out $@ -t ES5

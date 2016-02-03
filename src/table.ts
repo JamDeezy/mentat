@@ -1,25 +1,27 @@
 /// <reference path="mentat.ts"/>
 
-
-interface mentatTable {
-  data: any[],
-  headers: string[],
-  keys: string[],
-  selector: string,
-  cols?: any,
-  rows?: any
+declare module mentat {
+  module Table {
+    interface config {
+      data: any[],
+      headers: string[],
+      keys: string[],
+      selector: string,
+      cols?: any,
+      rows?: any
+    }
+  }
 }
-
 
 module mentat {
 
   /*
    * Main constructor
    *
-   * @param config<mentatTable> - Main argument hash
+   * @param config<mentat.Table.config> - Main argument hash
    * @return Table
    */
-  export function table(config: mentatTable): Table {
+  export function table(config: mentat.Table.config): Table {
     return new Table(config);
   }
 
@@ -31,12 +33,12 @@ module mentat {
     private table: HTMLElement;
     private thead: HTMLElement;
     private tbody: HTMLElement;
-    private config: mentatTable;
+    private config: mentat.Table.config;
 
     /*
      *
      */
-    constructor(config: mentatTable) {
+    constructor(config: mentat.Table.config) {
       this.parent = <HTMLElement>document.querySelector(config.selector);
       this.build(config);
 
@@ -46,7 +48,7 @@ module mentat {
     /*
      * lol
      */
-    private build(config: mentatTable) {
+    private build(config: mentat.Table.config) {
       // process data
       var data = this.buildDataSet(config);
 
@@ -81,7 +83,7 @@ module mentat {
     /*
      *
      */
-    private buildDataSet(config: mentatTable) {
+    private buildDataSet(config: mentat.Table.config) {
       var keys = config.keys;
       var data = config.data;
       var headers = config.headers;
@@ -127,7 +129,7 @@ module mentat {
     /*
      *
      */
-    private buildTableHead(config: mentatTable) {
+    private buildTableHead(config: mentat.Table.config) {
       var headers = config.headers;
       var tableHead = document.createElement('thead');
       var tableHeaderRow = document.createElement('tr');
@@ -147,7 +149,7 @@ module mentat {
     /*
      *
      */
-    private buildTableBody(data: any[], config: mentatTable) {
+    private buildTableBody(data: any[], config: mentat.Table.config) {
       var headers = config.headers;
       var tableBody = document.createElement('tbody');
 
@@ -163,7 +165,7 @@ module mentat {
     /*
      *
      */
-    private customize(tbody: HTMLElement, data: any[], config: mentatTable) {
+    private customize(tbody: HTMLElement, data: any[], config: mentat.Table.config) {
       // Custom columns
       var rowNodes = tbody.childNodes;
       for (var i = 0; i < rowNodes.length; i++) {

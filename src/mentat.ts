@@ -1,36 +1,9 @@
-/*
- * Mentat v1.0
- * Interface defintion
- */
-declare module axis {
-  interface x {
-    type: string,
-    selector: string,
-    format: string,
-  }
-
-  interface y {
-
-  }
-}
-
-interface mentat {
-  type: string,
-  selector: string,
-  data: Array<any>,
-  x: string | axis.x,
-  y: string | string[]
-}
+/// <reference path="dts/d3.d.ts"/>
+/// <reference path="dts/mentat.d.ts"/>
 
 
 module mentat {
 
-  /**
-   * Main constructor
-   */
-  export function graph(config: mentat) {
-    return new Chart(config);
-  }
   /**
    * Helpers
    */
@@ -80,62 +53,8 @@ module mentat {
     console.warn("MENTAT: " + str);
   }
 
-  /**
-   * Global configuration update
-   */
-  export function config(config: any) {
-    for (var i = 0; i < computations.length; i++) {
-      computations[i].config(config);
-    }
-
-    for (var key in config) {
-
-    }
-  }
-
-  /**
-   *
-   */
-  var globalConfig: any = {};
-
-  /**
-   *
-   */
-  var computations: Chart[] = [];
-
-  class Axis {
-    constructor(config: mentat) {
-
-    }
-  }
-
-  class Chart {
-    private localConfig: mentat;
-    private axis: Axis;
-
-    constructor(config: mentat) {
-      this.axis = new Axis(config);
-      computations.push(this)
-      return this;
-    }
-
-    public config(config: any) {
-
-    }
-
-    public transform(config: any) {
-
-    }
-
-    public attr(key: string);
-    public attr(key: string, value: any);
-    public attr(key: string, value?: any): any {
-      if (typeof value !== 'undefined') {
-        this.localConfig[key] = value;
-      } else {
-        this.localConfig[key];
-      }
-    }
+  export function error(str: string) {
+    throw "MENTAT: " + str
   }
 
 }
@@ -200,8 +119,6 @@ Array.prototype.sum = function(prop) {
 }
 
 // TODO
-// non-normalized data set for table??
-// fixed rows and classes
 // API + documentation
 // pagnation
 
