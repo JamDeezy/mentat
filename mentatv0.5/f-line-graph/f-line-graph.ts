@@ -11,7 +11,6 @@ module flipp.mentat {
     createdCallback() {
       if (!this._el)
         LineGraph.call(this, this);
-
       this.setup();
     }
 
@@ -46,8 +45,6 @@ module flipp.mentat {
       var height = this.size.height - this.margin.top - this.margin.bottom;
       var colors = d3FlippColors(this.axes.y);
       var svg = d3SvgBase(this._el, this.size, this.margin);
-      svg.attr("transform", "translate(" +
-        this.margin.left + "," + this.margin.top + ")")
 
       var tip = new Tooltip(svg)
         .offset([20, 5])
@@ -60,6 +57,8 @@ module flipp.mentat {
           /* Remove data overlay */
           d3RemoveOverlay(svg);
           svg.selectAll('*').remove();
+          svg.attr("transform",
+            "translate(" + this.margin.left + "," + this.margin.top + ")")
 
           /* Run through decode for each data point */
           var dataSets = this.decodeFunc(this.data, this.axes);
@@ -72,10 +71,6 @@ module flipp.mentat {
           var y = d3LinearScale([height, 0], dataRange)
 
           var customTimeFormat = d3.time.format.multi([
-            [".%L", function(d) { return d.getMilliseconds(); }],
-            [":%S", function(d) { return d.getSeconds(); }],
-            ["%I:%M", function(d) { return d.getMinutes(); }],
-            ["%I %p", function(d) { return d.getHours(); }],
             ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
             ["%b %d", function(d) { return d.getDate() != 1; }],
             ["%B", function(d) { return d.getMonth(); }],
@@ -179,10 +174,13 @@ module flipp.mentat {
 
                   var pointEl: any = point[0][0]
                   var position = pointEl.getBoundingClientRect();
+                  var orientation = ((position.left / width) > 0.5) ?
+                    "left" : "right";
+
                   tip.show([
                     position.left + window.pageXOffset,
                     position.top + window.pageYOffset
-                  ], datapoint);
+                  ], datapoint, orientation);
                 })
           }
 

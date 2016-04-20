@@ -11,7 +11,6 @@ module flipp.mentat {
     createdCallback() {
       if (!this._el)
         BarGraph.call(this, this)
-
       this.setup();
     }
 

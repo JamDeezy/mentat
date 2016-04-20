@@ -15,11 +15,32 @@ module flipp.mentat {
       return this;
     }
 
-    public show(v, d): Tooltip {
+    public show(v, d, o?): Tooltip {
       this._el.innerHTML = this._html(d);
       this._el.style.left = (v[0] + this._offset[0]) + 'px'
       this._el.style.top = (v[1] + this._offset[1]) + 'px';
       this._el.style.opacity = '1';
+
+      if (typeof o !== 'undefined') {
+        // Right is default
+        this._el.classList.remove('top', 'bottom', 'left', 'right');
+
+        switch(o) {
+          case 'top':
+            this._el.classList.add('top');
+            break;
+          case 'bottom':
+            this._el.classList.add('bottom');
+            break;
+          case 'left':
+            this._el.classList.add('left');
+            break;
+          case 'right':
+          default:
+            this._el.classList.add('right');
+            break;
+        }
+      }
       return this;
     }
 
