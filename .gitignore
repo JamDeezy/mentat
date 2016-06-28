@@ -1,3 +1,2 @@
 node_modules/*
-*.csv
-f-mentat*
+npm-debug.log

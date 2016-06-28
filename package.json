@@ -1,19 +1,24 @@
 {
   "name": "Mentat",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/watch",
     "pkg": "node ./bin/package"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ezdzdev/mentat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ezdzdev/flipp_book/issues"
+  },
+  "homepage": "https://github.com/ezdzdev/flipp_book#readme",
   "dependencies": {
-    "node-sass": "3.3.2",
+    "ts-loader": "0.8.2",
     "typescript": "1.7.3",
-    "vulcanize": "1.14.0",
-    "handlebars": "3.0.3",
-    "html-minifier": "*",
-    "debug": "2.2.0",
-    "fsmonitor": "0.2.4",
-    "s3": "4.4.0"
+    "webpack": "1.13.1",
+    "d3": "4.0.0",
+    "topojson": "1.6.26"
   }
 }

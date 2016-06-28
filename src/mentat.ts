@@ -1,6 +1,4 @@
 /// <reference path="dts/d3.d.ts"/>
-/// <reference path="dts/mentat.d.ts"/>
-
 
 module mentat {
 

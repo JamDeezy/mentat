@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "files": [
+    "src/dts/d3.d.ts",
+    "src/dts/mentat.d.ts",
+    "src/dts/moment.d.ts",
+    "src/mentat.ts",
+    "src/chart.ts",
+    "src/table.ts"
+  ]
+}
