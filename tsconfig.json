@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "sourceMap": true
+    "target": "es5",
+    "module": "commonjs"
   },
   "exclude": [
     "node_modules"
@@ -11,7 +11,6 @@
     "src/dts/mentat.d.ts",
     "src/dts/moment.d.ts",
     "src/mentat.ts",
-    "src/chart.ts",
-    "src/table.ts"
+    "src/lib/map.ts"
   ]
 }

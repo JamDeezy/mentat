@@ -5,10 +5,9 @@ var webpack = require('webpack');
 
 module.exports = {
   context: __dirname,
-  devtool: debug ? 'inline-sourcemap' : null,
   entry: "./src/mentat.ts",
   output: {
-    filename: debug ? "./lib/mentat.js" :  "./lib/mentat.min.js"
+    filename: debug ? "./mentat.js" :  "./mentat.min.js"
   }
 }
 
@@ -19,6 +18,9 @@ module.exports.plugins = debug ? [] : [
   new webpack.optimize.UglifyJsPlugin({
     mangle: false, sourcemap:false
   }),
+  new webpack.ProvidePlugin({
+    d3: 'd3',
+  })
 ];
 
 // Resolve

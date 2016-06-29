@@ -1,17 +1,10 @@
 /// <reference path="dts/d3.d.ts"/>
+/// <reference path="dts/require.d.ts"/>
 
 module mentat {
 
-  /**
-   * Helpers
-   */
-  export function createDocumentFragment(html: string): DocumentFragment {
-    return document.createRange().createContextualFragment(html);
-  }
-
-  /*
-   * http://stackoverflow.com/questions/4340227
-   */
+  // Alphanumeric comparison
+  // http://stackoverflow.com/questions/4340227
   export function alphanumCompare(a, b) {
     var reA = /[^a-zA-Z]/g;
     var reN = /[^0-9]/g;
@@ -27,6 +20,7 @@ module mentat {
     }
   }
 
+  // Natural comparison
   export function naturalCompare(a, b) {
     var ax = [], bx = [];
 
@@ -54,66 +48,6 @@ module mentat {
   export function error(str: string) {
     throw "MENTAT: " + str
   }
-
-}
-
-/**
- * TODO: find a place for this
- */
-interface Array<T> {
-  unique(): any[];
-  flatten(): any[];
-  sum(prop): number;
-}
-
-/**
- * http://codereview.stackexchange.com/questions/83717
- */
-Array.prototype.unique = function() {
-  var seen = {}
-  return this.filter(function(x) {
-    if (seen[x])
-      return
-    seen[x] = true
-    return x
-  })
-}
-
-/**
- * http://stackoverflow.com/questions/27266550
- */
-Array.prototype.flatten = function() {
-  var toString = Object.prototype.toString;
-  var arrayTypeStr = '[object Array]';
-
-  var result = [];
-  var nodes = this.slice();
-  var node;
-
-  if (!this.length) {
-    return result;
-  }
-
-  node = nodes.pop();
-
-  do {
-    if (toString.call(node) === arrayTypeStr) {
-      nodes.push.apply(nodes, node);
-    } else {
-      result.push(node);
-    }
-  } while (nodes.length && (node = nodes.pop()) !== undefined);
-
-  result.reverse();
-  return result;
-}
-
-Array.prototype.sum = function(prop) {
-  var total = 0
-  for (var i = 0, _len = this.length; i < _len; i++) {
-    total += this[i][prop]
-  }
-  return total
 }
 
 // TODO
