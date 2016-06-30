@@ -1,0 +1,20 @@
+{
+  "name": "Mentat",
+  "version": "0.5.1",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "NODE_ENV=production webpack",
+    "dev": "webpack",
+    "watch": "webpack --progress --colors --watch",
+    "start": "node ./bin/watch",
+    "pkg": "node ./bin/package"
+  },
+  "dependencies": {
+    "webpack": "1.13.1",
+    "d3": "4.0.0",
+    "topojson": "1.6.26",
+    "babel-loader": "6.2.0",
+    "babel-core": "6.10.4"
+  }
+}

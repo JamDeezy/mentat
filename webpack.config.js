@@ -5,9 +5,11 @@ var webpack = require('webpack');
 
 module.exports = {
   context: __dirname,
-  entry: "./src/mentat.ts",
+  entry: "./src/mentat.js",
   output: {
-    filename: debug ? "./mentat.js" :  "./mentat.min.js"
+    filename: debug ? "./mentat.js" :  "./mentat.min.js",
+    library: "mentat",
+    libraryTarget: "var",
   }
 }
 
@@ -19,7 +21,8 @@ module.exports.plugins = debug ? [] : [
     mangle: false, sourcemap:false
   }),
   new webpack.ProvidePlugin({
-    d3: 'd3',
+    topojson: 'topojson',
+    d3: 'd3'
   })
 ];
 
@@ -30,8 +33,9 @@ module.exports.resolve = {
 
 // Modules
 module.exports.module = {
-  loaders: [
-    // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-    { test: /\.tsx?$/, loader: 'ts-loader' }
-  ]
+  loaders: [{
+    test: /\.jsx?$/,
+    exclude: /(node_modules|bower_components)/,
+    loader: 'babel-loader'
+  }]
 };

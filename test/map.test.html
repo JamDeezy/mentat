@@ -31,11 +31,10 @@
 
 </style>
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="http://d3js.org/topojson.v1.min.js"></script>
-<script src="mentat.js"></script>
+<!-- <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script> -->
+<script src="../mentat.js"></script>
 <script>
-
 var width = 960,
     height = 640,
     centered;
@@ -52,48 +51,48 @@ svg.append("rect")
 
 var g = svg.append("g");
 
-var projection = d3.geo.azimuthalEqualArea()
-    .rotate([100, -45])
-    .center([5, 20])
-    .scale(850)
-    .translate([width/2, height/2])
+// Construct svg paths based on geoJson data,
+// all we need to pass is country and width/height information
+if (0) {
+  var projection = d3.geo.azimuthalEqualArea()
+      .rotate([100, -45])
+      .center([5, 20])
+      .scale(850)
+      .translate([width/2, height/2])
 
-var path = d3.geo.path()
-    .projection(projection);
+  var path = d3.geo.path()
+      .projection(projection);
 
-d3.json("canada.json", function(error, ca) {
-  if (error) throw error;
+  d3.json("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/1.0.0/canada.json", function(error, ca) {
+    g.append("g")
+        .attr("id", "states")
+      .selectAll("path")
+        .data(ca.features)
+      .enter().append("path")
+        .attr("d", path)
+        .on("click", clicked);
+  });
+} else {
+  var projection = d3.geo.albersUsa()
+      .scale(1070)
+      .translate([width / 2, height / 2]);
 
-  g.append("g")
-      .attr("id", "states")
-    .selectAll("path")
-      .data(ca.features)
-    .enter().append("path")
-      .attr("d", path)
-      .on("click", clicked);
-});
+  var path = d3.geo.path()
+      .projection(projection);
 
+  d3.json("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/1.0.0/us.json", function(error, us) {
+    g.append("g")
+        .attr("id", "states")
+      .selectAll("path")
+        .data(topojson.feature(us, us.objects.states).features)
+      .enter().append("path")
+        .attr("d", path)
+        .on("click", clicked);
+  });
+}
 
-// var projection = d3.geo.albersUsa()
-//     .scale(1070)
-//     .translate([width / 2, height / 2]);
-
-// var path = d3.geo.path()
-//     .projection(projection);
-
-// d3.json("us.json", function(error, us) {
-//   if (error) throw error;
-
-//   g.append("g")
-//       .attr("id", "states")
-//     .selectAll("path")
-//       .data(topojson.feature(us, us.objects.states).features)
-//     .enter().append("path")
-//       .attr("d", path)
-//       .on("click", clicked);
-// });
-
-
+// functionailty for when a state/province is clicked
+// We zoom in on the centroid by a factor of 2
 function clicked(d) {
   var x, y, k;
 
@@ -113,10 +112,10 @@ function clicked(d) {
   g.selectAll("path")
       .classed("active", centered && function(d) { return d === centered; });
 
-  g.transition()
-      .duration(750)
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-      .style("stroke-width", 1.5 / k + "px");
+  // g.transition()
+  //     .duration(750)
+  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+  //     .style("stroke-width", 1.5 / k + "px");
 }
-
 </script>
+</body>
