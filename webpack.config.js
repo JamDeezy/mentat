@@ -2,6 +2,7 @@
 // webpack ./entry.js bundle.js  --module-bind 'css=style!css'
 var debug = process.env.NODE_ENV !== "production";
 var webpack = require('webpack');
+var packjson = require('./package.json');
 
 module.exports = {
   context: __dirname,
@@ -14,7 +15,16 @@ module.exports = {
 }
 
 // Plugins
-module.exports.plugins = debug ? [] : [
+module.exports.plugins = debug ? [
+  new webpack.ProvidePlugin({
+    topojson: 'topojson',
+    d3: 'd3'
+  }),
+  new webpack.DefinePlugin({
+    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/"),
+    APP_VERSION: JSON.stringify(packjson.version)
+  })
+] : [
   new webpack.optimize.DedupePlugin(),
   new webpack.optimize.OccurenceOrderPlugin(),
   new webpack.optimize.UglifyJsPlugin({
@@ -23,6 +33,10 @@ module.exports.plugins = debug ? [] : [
   new webpack.ProvidePlugin({
     topojson: 'topojson',
     d3: 'd3'
+  }),
+  new webpack.DefinePlugin({
+    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/"),
+    APP_VERSION: JSON.stringify(packjson.version)
   })
 ];
 
