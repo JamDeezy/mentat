@@ -1,7 +1,7 @@
 // Equivalent to
 // webpack ./entry.js bundle.js  --module-bind 'css=style!css'
-var debug = process.env.NODE_ENV !== "production";
-var webpack = require('webpack');
+var debug    = process.env.NODE_ENV !== "production";
+var webpack  = require('webpack');
 var packjson = require('./package.json');
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports.plugins = debug ? [
   new webpack.optimize.DedupePlugin(),
   new webpack.optimize.OccurenceOrderPlugin(),
   new webpack.optimize.UglifyJsPlugin({
-    mangle: false, sourcemap:false
+    sourcemap: false
   }),
   new webpack.ProvidePlugin({
     topojson: 'topojson',
@@ -51,5 +51,10 @@ module.exports.module = {
     test: /\.jsx?$/,
     exclude: /(node_modules|bower_components)/,
     loader: 'babel-loader'
+  },{
+    test: /\.scss$/,
+    loaders: ["style", "css", "sass"]
   }]
 };
+
+// TODO jasmine tests
