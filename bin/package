@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-var s3 = require('s3');
+var s3  = require('s3');
 var pkg = require('../package.json');
-var bucket = "f.wishabi.ca";
-var keyPath = "development_ezdz/mentat/" + pkg.version;
+var bkt = "f.wishabi.ca";
+var kpt = "mentat/" + pkg.version;
 
+// Make sure to have set your environment variables
+// export S3KEYID = <your_s3_key_id>
+// export S3SECRET = <your_s3_secret>
 var client = s3.createClient({
   s3Options: {
     accessKeyId: process.env.S3KEYID,
@@ -12,34 +15,39 @@ var client = s3.createClient({
   }
 });
 
-var paramsArr = [{
-  localFile: "f-mentat.min.html",
+// Change source and target if we're packaging for release
+// default => mentat.js
+// release => mentat.min.js
+var files = [{
+  localFile: "mentat.min.js",
   s3Params: {
     ACL:'public-read',
-    Bucket: bucket,
-    Key: keyPath +"/f-mentat.min.html"
+    Bucket: bkt,
+    Key: kpt + "/mentat.min.js"
   }
 }, {
-  localFile: "f-mentat.html",
+  localFile: "data/canada.json",
   s3Params: {
     ACL:'public-read',
-    Bucket: bucket,
-    Key: keyPath + "/f-mentat.html"
+    Bucket: bkt,
+    Key: kpt + "/canada.json"
+  }
+}, {
+  localFile: "data/us.json",
+  s3Params: {
+    ACL:'public-read',
+    Bucket: bkt,
+    Key: kpt + "/us.json"
   }
 }]
 
-for (var i = 0; i < paramsArr.length; i++) {
-  var uploader = client.uploadFile(paramsArr[i])
+// Upload to s3 with logs to terminal
+for (var i = 0; i < files.length; i++) {
+  var uploader = client.uploadFile(files[i])
     .on('error', function(err) {
-      console.error("unable to upload:", err.stack);
+      console.error("unable to upload:" + err.stack);
     })
-    .on('progress', function() {
-      console.log("progress",
-        uploader.progressMd5Amount,
-        uploader.progressAmount,
-        uploader.progressTotal);
-    })
-    .on('end', function() {
-      console.log("done uploading");
+    .on('end', function(data) {
+      console.log("uploaded " + data.ETag);
     });
 }

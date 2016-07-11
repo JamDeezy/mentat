@@ -1,27 +1,32 @@
+MENTAT
+======
 A Mentat was a profession or discipline that was developed as a replacement to
 the computers and thinking machines following the Butlerian Jihad that banned
 the creation of machines in the human mind's image, just as the Spacing Guild
 and the Bene Gesserit took up similar functions.
 
 
-MENTAT
-======
-Componentized d3 library to consume large amounts of data into visualizations
+### SETUP:
+Simply run
+
+    npm install
+
+Other commands:
+
+```
+npm run watch
+# Start watching /src folder for changes, will automatically run
+# a compile on the code, useful for development
+
+npm run build
+# Runs webpack in its default config
+
+npm run pkg
+# Runs webpack with node enviroment set to PRODUCTION. After compile,
+# the resulting file and all files under the /data directory will be
+# uploaded to the appropriate s3 key
+```
 
 
-SETUP
-=====
-npm install
-make release
-ez
-
-TODO
-====
-get rid of handlebars and web components
-create tables and graphs
-standardize customization
-standard css stylesheet
-
-CHANGELOG
-=====
+### CHANGELOG:
 Not even in production yet!

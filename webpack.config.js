@@ -21,7 +21,7 @@ module.exports.plugins = debug ? [
     d3: 'd3'
   }),
   new webpack.DefinePlugin({
-    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/"),
+    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/mentat/"),
     APP_VERSION: JSON.stringify(packjson.version)
   })
 ] : [
@@ -35,7 +35,7 @@ module.exports.plugins = debug ? [
     d3: 'd3'
   }),
   new webpack.DefinePlugin({
-    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/development_ezdz/mentat/"),
+    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/mentat/"),
     APP_VERSION: JSON.stringify(packjson.version)
   })
 ];

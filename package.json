@@ -4,18 +4,14 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "NODE_ENV=production webpack",
-    "dev": "webpack",
     "watch": "webpack --progress --colors --watch",
-    "start": "node ./bin/watch",
-    "pkg": "node ./bin/package"
+    "build": "webpack",
+    "pkg": "NODE_ENV=production webpack && node ./bin/package"
   },
   "dependencies": {
     "webpack": "1.13.1",
     "d3": "4.0.0",
-    "topojson": "1.6.26",
-    "babel-loader": "6.2.0",
-    "babel-core": "6.10.4"
+    "topojson": "1.6.26"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
@@ -25,6 +21,8 @@
     "sass-loader": "^4.0.0",
     "style-loader": "^0.13.1",
     "toolbox-loader": "0.0.3",
-    "webpack": "^1.13.1"
+    "babel-loader": "6.2.0",
+    "babel-core": "6.10.4",
+    "s3": "4.4.0"
   }
 }
