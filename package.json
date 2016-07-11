@@ -16,5 +16,15 @@
     "topojson": "1.6.26",
     "babel-loader": "6.2.0",
     "babel-core": "6.10.4"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "node-sass": "^3.8.0",
+    "postcss-loader": "^0.9.1",
+    "sass-loader": "^4.0.0",
+    "style-loader": "^0.13.1",
+    "toolbox-loader": "0.0.3",
+    "webpack": "^1.13.1"
   }
 }
