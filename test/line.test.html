@@ -2,14 +2,16 @@
 <meta charset="utf-8">
 <style>
 body {
+  margin: 0px;
+  padding: 0px;
   background: #eeeeee;
 }
 #container {
   width: 960px;
   height: 640px;
-  margin: 20px;
-  padding: 20px;
+  margin: 40px;
   background: #dddddd;
+
 }
 
 </style>
@@ -41,7 +43,10 @@ body {
         dimension: 'province',
         metric: 'clicks'
       },
-      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6']
+      scale: {
+        x: ['ab', 'bc', 'mb', 'nb', 'nl', 'nt',
+            'ns', 'on', 'pe', 'qc', 'sk', 'yt', 'nu']
+      }
     }
   )
 </script>

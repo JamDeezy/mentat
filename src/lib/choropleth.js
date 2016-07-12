@@ -15,7 +15,7 @@ var DEFCOLORS = ['#F7FBFF', '#DEEBF7', '#C6DBEF', '#9ECAE1', '#6BAED6',
 // @data[optional] - array of data to populate map
 // @key[optional] - hash of dimension and metric key values
 // @scale[optional] - array of color codes or callback function for fill
-function Choropleth(selector, country, data, key, scale, tooltip) {
+function Choropleth(selector, data, country, key, scale, tooltip) {
   var map = this;
   // Scope our variables
   map.container = document.querySelector(selector),
@@ -138,13 +138,13 @@ function Choropleth(selector, country, data, key, scale, tooltip) {
   // Construct svg paths based on geoJson data,
   var g = map.svg.append("g");
   if (map.country === 'ca') {
-    var projection = d3.geoAzimuthalEqualArea()
+    var projection = d3.geo.azimuthalEqualArea()
         .rotate([100, -45])
         .center([5, 20])
         .scale(map.width)
         .translate([map.width/2, map.height/2]);
 
-    var path = d3.geoPath()
+    var path = d3.geo.path()
         .projection(projection);
 
     d3.json(CAGEOJSON, function(error, ca) {
@@ -161,11 +161,11 @@ function Choropleth(selector, country, data, key, scale, tooltip) {
           .on("mouseout", map.hideTooltip);
     });
   } else {
-    var projection = d3.geoAlbersUsa()
+    var projection = d3.geo.albersUsa()
         .scale(map.width)
         .translate([map.width/2, map.height/2]);
 
-    var path = d3.geoPath()
+    var path = d3.geo.path()
         .projection(projection);
 
     d3.json(USGEOJSON, function(error, us) {
