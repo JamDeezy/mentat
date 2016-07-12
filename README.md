@@ -5,6 +5,13 @@ the computers and thinking machines following the Butlerian Jihad that banned
 the creation of machines in the human mind's image, just as the Spacing Guild
 and the Bene Gesserit took up similar functions.
 
+### USAGE:
+
+Compiled version of the library will be available via this url:
+
+    //s3.amazonaws.com/f.wishabi.ca/mentat/1.0.0/mentat.min.js
+    //s3.amazonaws.com/f.wishabi.ca/mentat/1.0.0/mentat.js
+
 
 ### SETUP:
 Simply run
@@ -26,6 +33,8 @@ npm run pkg
 # the resulting file and all files under the /data directory will be
 # uploaded to the appropriate s3 key
 ```
+
+
 
 
 ### CHANGELOG:
