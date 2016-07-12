@@ -1,0 +1,36 @@
+.mentat.line {
+  svg {
+    overflow: visible !important;
+
+    .line {
+      fill: none;
+    }
+
+    .axis {
+      path {
+        display: none;
+      }
+      line {
+        stroke: #ccc;
+        stroke-width: 1;
+      }
+      text {
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+
+    .scanner {
+      line {
+        stroke-dasharray: 3 3;
+        stroke: black;
+      }
+
+      circle {
+        fill: black;
+        stroke: white;
+        stroke-width: 1.5px;
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-node_modules/*
-mentat.js
-mentat.min.js
-npm-debug.log
+/node_modules/*
+/mentat.js
+/mentat.min.js
+/npm-debug.log
