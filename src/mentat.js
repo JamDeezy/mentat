@@ -1,8 +1,8 @@
 require("./stylesheets/tooltip.scss");
 
 // Libraries
-var Choropleth = require('./lib/choropleth');
-var Line = require('./lib/line');
+var Choropleth = require('./lib/Choropleth');
+var Line = require('./lib/Line');
 
 function mentat(selector, type, opts) {
 
@@ -44,10 +44,13 @@ function mentat(selector, type, opts) {
 
 
 // TODO
+// *) enable roll up of data based on dimension
+// *) update script to point to minified version in marketplace
 // 1) line graph
 // 2) bar graph
-// 3) update-able graphs
-// 4) callback on click or hover
+// 3) add click callback
+// 4) update-able graphs
+// 5) callback on click or hover
 
 
 module.exports = mentat;

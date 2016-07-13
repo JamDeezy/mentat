@@ -1,5 +1,6 @@
 var d3 = require('d3');
 var topojson = require("topojson");
+var BaseSVG = require("./BaseSVG");
 
 
 // Constants
@@ -16,16 +17,14 @@ var DEFCOLORS = ['#F7FBFF', '#DEEBF7', '#C6DBEF', '#9ECAE1', '#6BAED6',
 // @key[optional] - hash of dimension and metric key values
 // @scale[optional] - array of color codes or callback function for fill
 function Choropleth(selector, data, country, key, scale, tooltip) {
-  var map = this;
   // Scope our variables
-  map.container = document.querySelector(selector),
-  map.width     = map.container.offsetWidth,
-  map.height    = map.container.offsetHeight,
+  var map       = this;
+  map.base      = new BaseSVG(selector, 'choropleth'),
   map.country   = country,
   map.data      = data,
   map.key       = key,
   map.scale     = scale,
-  map.tooltip   = tooltip,
+  map.tooltip   = tooltip;
 
 
   // Find fill of a location based on data
@@ -35,7 +34,7 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
 
     // if color otherwise our own
     for (var i = 0; i < map.data.length; i++) {
-      if (map.data[i][map.key.dimension] === value) {
+      if (map.data[i][map.key.dimension].toLowerCase() === value) {
 
         if (map.scale instanceof Function) {
           return map.scale(data[i]);
@@ -72,13 +71,14 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
   // Show tooltip
   map.showTooltip = function(data) {
     var dp = map.data.find(function(d) {
-      return d[map.key.dimension] === data.properties.CODE
+      return d[map.key.dimension].toLowerCase() === data.properties.CODE
     });
 
     var dimension = map.key.dimension.toUpperCase(),
         metric    = map.key.metric.toUpperCase(),
         key       = dp[map.key.dimension].toUpperCase(),
-        value     = dp[map.key.metric]
+        value     = dp[map.key.metric],
+        position  = d3.mouse(this);
 
     this.parentNode.appendChild(this);
 
@@ -91,20 +91,20 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
       .duration(300)
       .style("opacity", 1);
 
-    map.div.style("left", (d3.event.pageX) + "px")
-      .style("top", (d3.event.pageY - 30) + "px");
+    map.div.style("left", (position[0]) + 20 + "px")
+      .style("top", (position[1] + 100) + "px");
 
     if (typeof map.tooltip === 'undefined') {
       map.div.html(dimension + ": " + key + "<br>" +
                    metric + ": " + d3.format(".2f")(value));
     } else {
-      map.div.html(map.tooltip(d));
+      map.div.html(map.tooltip(dp));
     }
   }
 
 
   // Hide tooltip
-  map.hideTooltip = function(d) {
+  map.hideTooltip = function(data) {
     d3.select(this)
       .transition().duration(300)
       .style("stroke", "white");
@@ -115,19 +115,8 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
 
 
   // Build our base svg,
-  map.svg = d3.select(selector)
-      .classed("mentat", true)
-      .classed("choropleth", true)
-    .append("svg")
-      .attr("width", map.width)
-      .attr("height", map.height);
-
-  // append a background rect that absorbs all pointer interaction.
-  map.svg.append("rect")
-      .attr("fill", "none")
-      .style("pointer-events", "all")
-      .attr("width", map.width)
-      .attr("height", map.height);
+  map.svg = map.base.svg;
+  map.base.setState(BaseSVG.stateENUM.LOADING);
 
   // Create an invisible div for our tooltip
   map.div = d3.select(selector)
@@ -136,19 +125,20 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
       .style("opacity", 0);
 
   // Construct svg paths based on geoJson data,
-  var g = map.svg.append("g");
   if (map.country === 'ca') {
     var projection = d3.geo.azimuthalEqualArea()
         .rotate([100, -45])
         .center([5, 20])
-        .scale(map.width)
-        .translate([map.width/2, map.height/2]);
+        .scale(map.base.width)
+        .translate([map.base.width/2, map.base.height/2]);
 
     var path = d3.geo.path()
         .projection(projection);
 
     d3.json(CAGEOJSON, function(error, ca) {
-      g.append("g")
+      map.base.setState(BaseSVG.stateENUM.READY);
+
+      map.svg.append("g")
           .selectAll("path")
           .data(ca.features)
           .enter()
@@ -162,14 +152,16 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
     });
   } else {
     var projection = d3.geo.albersUsa()
-        .scale(map.width)
-        .translate([map.width/2, map.height/2]);
+        .scale(map.base.width)
+        .translate([map.base.width/2, map.base.height/2]);
 
     var path = d3.geo.path()
         .projection(projection);
 
     d3.json(USGEOJSON, function(error, us) {
-      g.append("g")
+      map.base.setState(BaseSVG.stateENUM.READY);
+
+      map.svg.append("g")
           .selectAll("path")
           .data(topojson.feature(us, us.objects.states).features)
           .enter()
@@ -180,10 +172,7 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
           .on("mouseout", map.hideTooltip);
     });
   }
+  window.test = this;
 }
 
 module.exports = Choropleth;
-// TODO
-// 1) click call back to main script
-// 2) queuejs for importing geojsons
-// 3) upload geojson files with deploy

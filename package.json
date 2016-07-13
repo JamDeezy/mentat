@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --progress --colors --watch",
     "build": "webpack",
-    "pkg": "NODE_ENV=production webpack && node ./bin/package"
+    "pkg": "NODE_ENV=production webpack && webpack && node ./bin/package"
   },
   "dependencies": {
     "webpack": "1.13.1",

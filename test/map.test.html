@@ -18,7 +18,7 @@
     'choropleth',
     {
       country: 'ca',
-      data: [
+      data: [ // array of data points
         { province: 'ab', clicks: Math.random() * 100 },
         { province: 'bc', clicks: Math.random() * 100 },
         { province: 'mb', clicks: Math.random() * 100 },
@@ -33,11 +33,11 @@
         { province: 'yt', clicks: Math.random() * 100 },
         { province: 'nu', clicks: Math.random() * 100 },
       ],
-      key: {
+      key: { // keys
         dimension: 'province',
         metric: 'clicks'
       },
-      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6']
+      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6', '#ffee00']
     }
   )
 </script>

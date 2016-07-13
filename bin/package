@@ -26,6 +26,13 @@ var files = [{
     Key: kpt + "/mentat.min.js"
   }
 }, {
+  localFile: "mentat.js",
+  s3Params: {
+    ACL:'public-read',
+    Bucket: bkt,
+    Key: kpt + "/mentat.js"
+  }
+}, {
   localFile: "data/canada.json",
   s3Params: {
     ACL:'public-read',

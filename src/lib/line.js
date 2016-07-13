@@ -8,7 +8,8 @@ var DEFCOLORS = ["#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
 function Line(selector, data, key, axis, scale, tooltip) {
   var line = this;
   //
-  line.container = document.querySelector(selector),
+  line.container = selector instanceof HTMLElement ?
+                   selector : document.querySelector(selector),
   line.width     = line.container.offsetWidth,
   line.height    = line.container.offsetHeight,
   line.data      = data,
@@ -101,5 +102,3 @@ function Line(selector, data, key, axis, scale, tooltip) {
 }
 
 module.exports = Line
-// TODO
-// 1) figure out the margins of svg based on css
