@@ -64,7 +64,6 @@ function Line(selector, data, key, axis, scale, tooltip) {
   }
 
   // Figure out domain + range of data
-  debugger
   line.x.domain(
     typeof line.scale.x === 'undefined' ?
     d3.extent(line.data, function(d) { return d[line.key.dimension]}) :

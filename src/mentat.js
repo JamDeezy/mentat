@@ -44,7 +44,6 @@ function mentat(selector, type, opts) {
 
 
 // TODO
-// *) enable roll up of data based on dimension
 // *) update script to point to minified version in marketplace
 // 1) line graph
 // 2) bar graph
