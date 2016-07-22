@@ -1,5 +1,4 @@
 function DataSet(data, dimension, metric) {
-
   // Scope dis
   var ds       = this;
   ds.origData  = data,
@@ -43,6 +42,7 @@ function DataSet(data, dimension, metric) {
         }
       })
       .entries(ds.origData);
+
 
   return ds;
 }

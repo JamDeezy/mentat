@@ -1,19 +1,22 @@
+var d3 = require('d3');
+var BaseSVG = require("./BaseSVG");
+var DataSet = require("./DataSet");
+
+
+// Styles
 require("../stylesheets/line.scss");
 
+// Constants
 var DEFCOLORS = ["#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#e67e22",
                  "#e74c3c", "#9b59b6", "#ecf0f1", "#95a5a6", "#34495e"];
 
-//
+// Line
 //
 function Line(selector, data, key, axis, scale, tooltip) {
-  var line = this;
-  //
-  line.container = selector instanceof HTMLElement ?
-                   selector : document.querySelector(selector),
-  line.width     = line.container.offsetWidth,
-  line.height    = line.container.offsetHeight,
-  line.data      = data,
-  line.key       = key,
+  // Scope our variables
+  var line       = this;
+  line.base      = new BaseSVG(selector, 'line'),
+  line.data      = new DataSet(data, key.dimension, key.metric),
   line.scale     = scale,
   line.tooltip   = tooltip,
   line.x         = d3.scale.linear().range([0, line.width]),
@@ -75,15 +78,10 @@ function Line(selector, data, key, axis, scale, tooltip) {
     line.scale.y
   );
 
+
   // Base SVG
-  line.svg = d3.select(selector)
-      .classed("mentat", true)
-      .classed("line", true)
-    .append("svg")
-      .attr("width", line.width)
-      .attr("height", line.height)
-      .style("background","#cccccc")
-    .append("g");
+  line.svg = line.base.svg;
+  line.base.setState(BaseSVG.stateENUM.LOADING);
 
   line.svg.append("g")
     .attr("class", "x axis")
@@ -97,7 +95,6 @@ function Line(selector, data, key, axis, scale, tooltip) {
   var plot = d3.svg.line()
     .x(function(d) { return x(d.x) })
     .y(function(d) { return y(d.y) });
-
 }
 
 module.exports = Line

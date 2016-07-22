@@ -13,26 +13,31 @@
 </body>
 <script src="../mentat.js"></script>
 <script>
+  var data = [ // array of data points
+    { province: 'ab', clicks: Math.random() * 100 },
+    { province: 'bc', clicks: Math.random() * 100 },
+    { province: 'mb', clicks: Math.random() * 100 },
+    { province: 'nb', clicks: Math.random() * 100 },
+    { province: 'nl', clicks: Math.random() * 100 },
+    { province: 'nt', clicks: Math.random() * 100 },
+    { province: 'ns', clicks: Math.random() * 100 },
+    { province: 'on', clicks: 99 },
+    { province: 'pe', clicks: Math.random() * 100 },
+    { province: 'qc', clicks: Math.random() * 100 },
+    { province: 'sk', clicks: Math.random() * 100 },
+    { province: 'ON', clicks: 55 },
+    { province: 'nu', clicks: Math.random() * 100 },
+  ]
+
+
+
+
   mentat(
     '#container',
     'choropleth',
     {
+      data: data,
       country: 'ca',
-      data: [ // array of data points
-        { province: 'ab', clicks: Math.random() * 100 },
-        { province: 'bc', clicks: Math.random() * 100 },
-        { province: 'mb', clicks: Math.random() * 100 },
-        { province: 'nb', clicks: Math.random() * 100 },
-        { province: 'nl', clicks: Math.random() * 100 },
-        { province: 'nt', clicks: Math.random() * 100 },
-        { province: 'ns', clicks: Math.random() * 100 },
-        { province: 'on', clicks: 99 },
-        { province: 'pe', clicks: Math.random() * 100 },
-        { province: 'qc', clicks: Math.random() * 100 },
-        { province: 'sk', clicks: Math.random() * 100 },
-        { province: 'ON', clicks: 55 },
-        { province: 'nu', clicks: Math.random() * 100 },
-      ],
       key: { // keys
         dimension: 'province',
         metric: 'clicks'

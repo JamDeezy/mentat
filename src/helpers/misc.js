@@ -37,9 +37,9 @@ export var naturalCompare = function(a, b) {
 }
 
 export var warn = function(string) {
-  console.warn("MENTAT: " + str);
+  console.warn("MENTAT: " + string);
 }
 
-export var error = function(sstring) {
-  throw "MENTAT: " + str
+export var error = function(string) {
+  throw "MENTAT: " + string
 }

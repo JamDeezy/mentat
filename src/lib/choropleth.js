@@ -1,5 +1,4 @@
 var d3 = require('d3');
-var topojson = require("topojson");
 var BaseSVG = require("./BaseSVG");
 var DataSet = require("./DataSet");
 
@@ -13,19 +12,20 @@ var EMPTYCLR  = "#CCCCCC";
 
 
 // Choropleth
-// @selector - querySelector string for the container element
-// @country - 2 letter country code (ca/us)
-// @data[optional] - array of data to populate map
-// @key[optional] - hash of dimension and metric key values
-// @scale[optional] - array of color codes or callback function for fill
-function Choropleth(selector, data, country, key, scale, tooltip) {
+// @selector           - querySelector string for the container element
+// @data               - array of data to populate map
+// @key                - hash of dimension and metric key values
+// @country[optional]  - 2 letter country code (ca/us), default: ca
+// @scale[optional]    - array of color codes or callback function for fill
+// @tooltip[optional]  - call back for html string
+function Choropleth(selector, data, key, country, scale, tooltip) {
   // Scope our variables
   var map       = this;
   map.base      = new BaseSVG(selector, 'choropleth'),
   map.dataSet   = new DataSet(data, key.dimension, key.metric),
-  map.country   = country,
   map.key       = key,
   map.scale     = scale,
+  map.country   = country,
   map.tooltip   = tooltip;
 
 
@@ -38,9 +38,9 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
     // Did not find data
     if (!dp) return EMPTYCLR;
 
-    // if color otherwise our own
+    // if scale otherwise our own
     if (map.scale instanceof Function) {
-      return map.scale(dp);
+      return map.scale(dp, extent);
 
     } else if (map.scale instanceof Array) {
       var index = map.linear(extent, map.scale.length, dp.value);
@@ -94,9 +94,11 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
       .style("top", (position[1] + 100) + "px");
 
     if (typeof map.tooltip === 'undefined') {
-      map.div.html(dimension + ": " + key + "<br>" + metric + ": " +
-                   // This line detects if the number is a decimal or whole
-                   (value % 1 != 0 ? d3.format(".2f")(value) : value));
+      map.div.html(
+        dimension + ": " + key + "<br>" + metric + ": " +
+        // This line detects if the number is a decimal or whole
+        (value % 1 != 0 ? d3.format(".2f")(value) : value)
+      );
     } else {
       map.div.html(map.tooltip(dp));
     }
@@ -152,7 +154,7 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
     });
   } else {
     var projection = d3.geo.albersUsa()
-        .scale(map.base.width)
+        .scale(map.base.width + 150) // Hardcode additional scale
         .translate([map.base.width/2, map.base.height/2]);
 
     var path = d3.geo.path()
@@ -163,10 +165,12 @@ function Choropleth(selector, data, country, key, scale, tooltip) {
 
       map.svg.append("g")
           .selectAll("path")
-          .data(topojson.feature(us, us.objects.states).features)
+          .data(us.features)
           .enter()
         .append("path")
           .attr("d", path)
+          .style("stroke", "white")
+          .style("stroke-width", "1px")
           .attr("fill", map.fill)
           .on("mouseover", map.showTooltip)
           .on("mouseout", map.hideTooltip);
