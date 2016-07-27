@@ -58,12 +58,13 @@ function mentat(selector, type, key, data, opts) {
 // 1) line graph
 // 2) bar graph
 // 3) add click callback
-// 4) update-able graphs
-// 5) callback on click or hover
+// 4) introduce modes into various visualizations
 
-// *) helpers => extensions
-
-// tier 2
+// TODO tier 2
 // http://www.visualcinnamon.com/babynamesus
 // http://dataaddict.fr/prenoms/#christelle,christophe,carole,berengere,aurelie,isabelle,david,jean,michel,philippe
+// http://bl.ocks.org/mbostock/3943967
+// http://bl.ocks.org/mbostock/1256572
+// Expand DataSet to fetch from ajax endpoint
+// Work on updatable graph
 module.exports = mentat;

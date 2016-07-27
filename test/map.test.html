@@ -29,20 +29,12 @@
     { province: 'nu', clicks: Math.random() * 100 },
   ]
 
-
-
-
   mentat(
-    '#container',
-    'choropleth',
+    '#container', 'choropleth', data,
+    { dimension: 'province', metric: 'clicks' },
     {
-      data: data,
       country: 'ca',
-      key: { // keys
-        dimension: 'province',
-        metric: 'clicks'
-      },
-      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6', '#ffee00']
+      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6']
     }
   )
 </script>

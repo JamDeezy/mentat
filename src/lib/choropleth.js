@@ -1,7 +1,9 @@
-var d3 = require('d3');
+var d3      = require("d3");
+
+// Classes
 var BaseSVG = require("./BaseSVG");
 var DataSet = require("./DataSet");
-
+var Tooltip = require("./Tooltip");
 
 // Constants
 var CAGEOJSON = APP_PATH + APP_VERSION + "/canada.json";
@@ -25,13 +27,35 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
   map.dataSet   = new DataSet(data, key.dimension, key.metric),
   map.key       = key,
   map.scale     = scale,
-  map.country   = country,
-  map.tooltip   = tooltip;
+  map.tooltip   = tooltip,
+  map.country   = country;
+
+
+  // Also instantiate our tooltip
+  // We also need to bring forward the current svg
+  var html = function(d) {
+    var dp        = map.dataSet.findDs(d.properties.CODE);
+    // Did not find data
+    if (!dp)      return "No Data";
+
+    var dimension = map.key.dimension.toUpperCase(),
+        metric    = map.key.metric.toUpperCase(),
+        key       = dp.key.toUpperCase(),
+        value     = dp.value;
+
+    if (typeof map.tooltip === 'undefined') {
+      return dimension + " " + key + "<br>" + metric +
+        ": " + (value % 1 != 0 ? d3.format(".2f")(value) : value)
+    } else {
+      return map.tooltip(dp);
+    }
+  }
+  map.tip = new Tooltip(selector, html);
 
 
   // Find fill of a location based on data
   map.fill = function(data) {
-    var extent = map.dataSet.extent(),
+    var extent = map.dataSet.extent(map.key.metric),
         key    = data.properties.CODE,
         dp     = map.dataSet.findDs(key);
 
@@ -43,11 +67,11 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
       return map.scale(dp, extent);
 
     } else if (map.scale instanceof Array) {
-      var index = map.linear(extent, map.scale.length, dp.value);
+      var index = map.linear(dp.value, extent, map.scale.length);
       return map.scale[index];
 
     } else {
-      var index = map.linear(extent, 9, dp.value);
+      var index = map.linear(dp.value, extent, 9);
       return DEFCOLORS[index];
     }
   }
@@ -56,63 +80,14 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
   // Linear - find the linear distributed value
   // using an extent of [min,max], n number of buckets
   // and the value.
-  map.linear = function(extent, buckets, value) {
+  map.linear = function(value, extent, buckets) {
     var range = extent[1] - extent[0],
-        size = range / buckets,
-        num = (value - extent[0]) / size
+        size  = range / buckets,
+        num   = (value - extent[0]) / size;
 
-    // On the maximum, we return buckets - 1 since we want our
-    // range to be [0, buckets)
+    // On the maximum, we return n - 1 since we
+    // want our range to be [0, buckets)
     return value == extent[1] ? buckets - 1 : Math.floor(num);
-  }
-
-
-  // Show tooltip
-  map.showTooltip = function(data) {
-    var dp        = map.dataSet.findDs(data.properties.CODE);
-    // Did not find data
-    if (!dp)      return;
-
-    var dimension = map.key.dimension.toUpperCase(),
-        metric    = map.key.metric.toUpperCase(),
-        key       = dp.key.toUpperCase(),
-        value     = dp.value,
-        position  = d3.mouse(this);
-
-    this.parentNode.appendChild(this);
-
-    d3.select(this)
-      .transition()
-      .duration(300)
-      .style("stroke", "black");
-
-    map.div.transition()
-      .duration(300)
-      .style("opacity", 1);
-
-    map.div.style("left", (position[0]) + 20 + "px")
-      .style("top", (position[1] + 100) + "px");
-
-    if (typeof map.tooltip === 'undefined') {
-      map.div.html(
-        dimension + ": " + key + "<br>" + metric + ": " +
-        // This line detects if the number is a decimal or whole
-        (value % 1 != 0 ? d3.format(".2f")(value) : value)
-      );
-    } else {
-      map.div.html(map.tooltip(dp));
-    }
-  }
-
-
-  // Hide tooltip
-  map.hideTooltip = function(data) {
-    d3.select(this)
-      .transition().duration(300)
-      .style("stroke", "white");
-
-    map.div.transition().duration(300)
-      .style("opacity", 0);
   }
 
 
@@ -120,11 +95,6 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
   map.svg = map.base.svg;
   map.base.setState(BaseSVG.stateENUM.LOADING);
 
-  // Create an invisible div for our tooltip
-  map.div = d3.select(selector)
-      .append("div")
-      .classed("tooltip", true)
-      .style("opacity", 0);
 
   // Construct svg paths based on geoJson data,
   if (map.country === 'ca') {
@@ -149,8 +119,8 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
           .style("stroke", "white")
           .style("stroke-width", "1px")
           .attr("fill", map.fill)
-          .on("mouseover", map.showTooltip)
-          .on("mouseout", map.hideTooltip);
+          .on("mouseover", map.tip.show)
+          .on("mouseout", map.tip.hide);
     });
   } else {
     var projection = d3.geo.albersUsa()
@@ -172,10 +142,11 @@ function Choropleth(selector, data, key, country, scale, tooltip) {
           .style("stroke", "white")
           .style("stroke-width", "1px")
           .attr("fill", map.fill)
-          .on("mouseover", map.showTooltip)
-          .on("mouseout", map.hideTooltip);
+          .on("mouseover", map.tip.show)
+          .on("mouseout", map.tip.hide);
     });
   }
+
   window.test = this;
 }
 

@@ -17,12 +17,11 @@ module.exports = {
 // Plugins
 module.exports.plugins = debug ? [
   new webpack.ProvidePlugin({
-    topojson: 'topojson',
-    d3: 'd3'
+    d3: 'd3', moment: 'moment', topojson: 'topojson'
   }),
   new webpack.DefinePlugin({
-    APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/mentat/"),
-    APP_VERSION: JSON.stringify(packjson.version)
+    APP_PATH: JSON.stringify("/data/"),
+    APP_VERSION: JSON.stringify("")
   })
 ] : [
   new webpack.optimize.DedupePlugin(),
@@ -31,8 +30,7 @@ module.exports.plugins = debug ? [
     sourcemap: false
   }),
   new webpack.ProvidePlugin({
-    topojson: 'topojson',
-    d3: 'd3'
+    d3: 'd3', moment: 'moment', topojson: 'topojson'
   }),
   new webpack.DefinePlugin({
     APP_PATH: JSON.stringify("//s3.amazonaws.com/f.wishabi.ca/mentat/"),

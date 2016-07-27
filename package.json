@@ -9,9 +9,10 @@
     "pkg": "NODE_ENV=production webpack && webpack && node ./bin/package"
   },
   "dependencies": {
-    "webpack": "1.13.1",
     "d3": "3.5.17",
-    "topojson": "1.6.26"
+    "moment": "2.0.0",
+    "topojson": "1.6.26",
+    "webpack": "1.13.1"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
