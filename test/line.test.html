@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/paper/bootstrap.min.css">
 <style>
 body {
   margin: 0px;
@@ -53,6 +54,15 @@ body {
     {
       scale: {
         x: d3.time.scale()
+      },
+      tooltip: function(d) {
+        var date = moment(d.key);
+        var str = "";
+        str += "<strong>" + date.format("YYYY-MM-DD") + "</strong><br>";
+        str += "New York: " + d.value[0] + "<br>";
+        str += "San Francisco: " + d.value[1] + "<br>";
+        str += "Austin: " + d.value[2] + "<br>";
+        return str;
       }
     }
   )

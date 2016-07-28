@@ -11,103 +11,102 @@ require("../stylesheets/tooltip.scss");
 
 function Tooltip(parent, html) {
   // Scoped
-  var tip     = this;
-  tip.parent  = d3.select(parent)
-  tip.html    = html;
+  var tip      = this;
+  tip.parent   = d3.select(parent),
+  tip.html     = html;
 
-  //
-  tip.node = tip.parent
+  // Create our div node!
+  // NOTE: we append to parent, which is not
+  // the svg, as svg's cannot render <div>'s
+  tip.div = tip.parent
     .append("div")
     .classed("tip n", true)
     .style("opacity", 0);
 
+  // TODO?
+  tip.place = function(pos) {
+    // Find out position and then check direction
+    var adjustedPos = adjustpos.apply(this,[pos]);
+    tip.div.style("left", adjustedPos[0] + "px")
+      .style("top", adjustedPos[1] + "px");
+  }
 
   //
   tip.show = function(data) {
-    var position = d3.mouse(this)
+    // Fill our tip by applying our callback
+    var str = tip.html.apply(this, [data]);
+    if (str) tip.div.html(str);
 
-    tip.node.transition()
+    // Locate and place our tooltip
+    tip.div.transition()
       .duration(300)
       .style("opacity", 1);
 
-    // TODO find out position and then check direction
-    tip.node.style("left", position[0] + "px")
-      .style("top", position[1] + "px");
-
-    // Fill our tip by applying our callback
-    // TODO should we do this before or after to position ourselves
-    var str = tip.html.apply(this, [data]);
-    tip.node.html(str);
+    var position = d3.mouse(this)
+    tip.place.apply(this,[position]);
   }
-
 
   //
   tip.hide = function() {
-    tip.node.transition()
+    tip.div.transition()
       .duration(300)
       .style("opacity", 0);
   }
 
-
-  // Proxy attr calls to the tooltip node.
+  // Proxy attr calls to the tooltip div.
   tip.attr = function(n, v) {
     if (arguments.length < 2 && typeof n === 'string') {
-      return tip.node.attr(n);
+      return tip.div.attr(n);
     } else {
-      return tip.node.attr(n, v);
+      return tip.div.attr(n, v);
     }
   }
 
-  // Proxy style calls to the tooltip node.
+  // Proxy style calls to the tooltip div.
   tip.style = function(n, v) {
     if (arguments.length < 2 && typeof n === 'string') {
-      return tip.node.style(n);
+      return tip.div.style(n);
     } else {
-      return tip.node.style(n, v);
+      return tip.div.style(n, v);
     }
   }
 
-  // tip.direction = function() {
-  // }
+  // Adjust the position of input coordinates
+  // based on container [w,h] and tooltip [w,h]
+  // Breakdown:
+  //     Q4  |  Q1
+  //         |
+  //    ----pos----
+  //         |
+  //     Q3  |  Q2
+  // NOTE:
+  // Unfortunately the web doesn't work like math
+  // Q3 is not the double negative quadrant since
+  // our y-axis increases downwards, aka our origin
+  // is in the top left hand corner.
+  function adjustpos(pos) {
+    var div = tip.div.node()
+      .getBoundingClientRect();
 
-  // tip.offset = function() {
-  // }
+    var svg = tip.parent.select('svg').node()
+      .getBBox();
 
+    var svgh = svg.height,
+        svgw = svg.width,
+        divh = div.height,
+        divw = div.width,
+        x    = pos[0],
+        y    = pos[1],
+        p    = [x - divw, y];
 
-  // tip.show = function() {
-  //     var args = Array.prototype.slice.call(arguments)
-  //     if(args[args.length - 1] instanceof SVGElement) target = args.pop()
+    // By default, the tooltip will appear in
+    // Q3. If there isn't enough space in Q3 for the
+    // tooltip, we shift the pos til there is
+    if (x - divw < 0)    p[0] += divw;
+    if (y        > svgh) p[1] -= divh;
 
-  //     var content = html.apply(this, args),
-  //         poffset = offset.apply(this, args),
-  //         dir     = direction.apply(this, args),
-  //         nodel   = d3.select(node),
-  //         i       = directions.length,
-  //         coords,
-  //         scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
-  //         scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
-
-  //     nodel.html(content)
-  //       .style({ opacity: 1/*, 'pointer-events': 'all' */})
-
-  //     while(i--) nodel.classed(directions[i], false)
-  //     coords = direction_callbacks.get(dir).apply(this)
-  //     nodel.classed(dir, true).style({
-  //       top: (coords.top +  poffset[0]) + scrollTop + 'px',
-  //       left: (coords.left + poffset[1]) + scrollLeft + 'px'
-  //     })
-
-  //     return tip
-  //   }
-
-  //   // Public - hide the tip
-  //   //
-  //   // Returns a tip
-  //   tip.hide = function() {
-  //     var nodel = d3.select(node)
-  //     nodel.style({ opacity: 0, 'pointer-events': 'none' })
-  //     return tip
-  //   }
+    return p;
+  }
 
   return tip;
 }

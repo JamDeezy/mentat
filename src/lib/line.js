@@ -29,6 +29,7 @@ function Line(selector, data, key, axis, scale, tooltip) {
   line.y         = typeof line.scale.y === 'undefined' ?
                    d3.scale.linear() : line.scale.y;
 
+
   // Also instantiate our tooltip
   // Since we're using a overlay,
   // we don't have a data point to bind to
@@ -36,14 +37,16 @@ function Line(selector, data, key, axis, scale, tooltip) {
     // Find closest data value based on our
     // mouse's x position by inverting on x axis
     var val = line.x.invert(d3.mouse(this)[0]);
-    var datapoint = line.dataSet.findApproxDs(val);
-
+    var dp  = line.dataSet.findApproxDs(val);
 
     scanner.style("display", null)
-      .attr("transform", "translate(" +
-        x(datapoint[requiredData[0]].x) + ", 0)");
-    point.attr("transform", "translate(0, " +
-      y(datapoint[requiredData[0]].y) + ")")
+      .attr("transform", "translate(" + line.x(dp.key) + ", 0)");
+
+    if (typeof line.tooltip === 'undefined') {
+      return "Tooltip missing!";
+    } else {
+      return line.tooltip(dp);
+    }
   }
   line.tip = new Tooltip(selector, html);
 
@@ -118,8 +121,10 @@ function Line(selector, data, key, axis, scale, tooltip) {
 
 
   // Configure the Y axis (dependent variable[s])
+  // Scale by 10% to give some vertical room
+  var yxtent = line.dataSet.extent(line.key.metric)
   line.y.range([line.base.height, 0])
-        .domain(line.dataSet.extent(line.key.metric));
+        .domain([yxtent[0] * 0.91, yxtent[1] * 1.1]);
 
   line.svg.append("g")
     .attr("class", "y axis")
@@ -137,21 +142,28 @@ function Line(selector, data, key, axis, scale, tooltip) {
     .append("g")
     .attr("class", "set");
 
+  // Up animation
+  var test = d3.svg.line()
+    .x(function(d) { return line.x(d.key) })
+    .y(function(d) { return line.y(yxtent[0] * 0.91) });
+
   var path = set.append("path")
     .attr("class", "line")
-    .attr("d", function(d) { return plot(d.values); })
-    .style("stroke", function(d) { return line.stroke(d.key); });
-
-
-  // Animations
-  var totalLength = path.node().getTotalLength();
-
-  path.attr("stroke-dasharray", totalLength + " " + totalLength)
-    .attr("stroke-dashoffset", totalLength)
+    .style("stroke", function(d) { return line.stroke(d.key); })
+    .attr("d", function(d) { return test(d.values); })
     .transition()
-    .duration(1000)
-    .ease("linear")
-    .attr("stroke-dashoffset", 0);
+    .duration(500)
+    .ease("cubic")
+    .attr("d", function(d) { return plot(d.values); })
+
+  // Across animation
+  // path.each(function(d) { d.tl = this.getTotalLength(); })
+  //   .attr("stroke-dasharray", function(d) { return d.tl + " " + d.tl; })
+  //   .attr("stroke-dashoffset", function(d) { return d.tl; })
+  //   .transition()
+  //   .duration(1000)
+  //   .ease("linear")
+  //   .attr("stroke-dashoffset", 0);
 
 
   // Hover scanner & point
@@ -163,11 +175,6 @@ function Line(selector, data, key, axis, scale, tooltip) {
     .style("stroke-dasharray", ("3, 3"))
     .attr("y1", 0)
     .attr("y2", line.base.height);
-
-  var point =
-    scanner.append("circle")
-      .style("fill", "steelblue")
-      .attr("r", 4);
 
   // Hover area overlay
   line.svg.append("rect")

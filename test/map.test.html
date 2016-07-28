@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/paper/bootstrap.min.css">
 <style>
 #container {
   width: 960px;
@@ -34,7 +35,18 @@
     { dimension: 'province', metric: 'clicks' },
     {
       country: 'ca',
-      scale: ['#C6DBEF', '#9ECAE1', '#6BAED6']
+      scale: function(dp, extent) {
+        // d3 log interpolation breaks on 0
+        extent[0] = (extent[0] == 0) ? 1 : extent[0]
+
+        var log =
+          d3.scale.log()
+            .domain(extent)
+            .range(['#C6DBEF', '#08519C']),
+            value = (dp.value == 0) ? 1 : dp.value;
+
+        return log(dp.value);
+      }
     }
   )
 </script>

@@ -26,10 +26,11 @@ function DataSet(data, dimension, metric) {
   // Find in dataset thats closest to key
   // http://stackoverflow.com/questions/26882631
   ds.findApproxDs = function(val) {
-    var bisect = d3.bisector(function(d) {
-        return (val instanceof Date) ? new Date(d.key) : d.key
-      })
-    var dp = ds.dsData[bisect.left(ds.dsData, val, 1)]
+    var bisect = d3.bisector(function(d) { return d.key; })
+    var index  = bisect.left(ds.dsData, val, 1);
+    var d0     = ds.dsData[index - 1],
+        d1     = ds.dsData[index];
+        dp     = val - d0.key > d1.key - val ? d1 : d0;
 
     // Format the return using standardized
     // key/value/src properties
@@ -113,7 +114,13 @@ function DataSet(data, dimension, metric) {
           };
         }
       })
-      .entries(ds.origData);
+      .entries(ds.origData)
+      .map(function(d) {
+        // Improve our quality of life by maintaining data type
+        if (ds.origData[0][ds.dimension] instanceof Date)
+          d.key = new Date(d.key);
+        return d;
+      });
 
   return ds;
 }

@@ -1,4 +1,4 @@
-require("./stylesheets/tooltip.scss");
+var moment = require("moment");
 
 // Libraries
 var Choropleth = require('./lib/Choropleth');

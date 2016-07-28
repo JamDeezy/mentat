@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "d3": "3.5.17",
-    "moment": "2.0.0",
+    "moment": "1.0.1",
     "topojson": "1.6.26",
     "webpack": "1.13.1"
   },

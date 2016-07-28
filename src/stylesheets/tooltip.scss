@@ -8,8 +8,8 @@
     background: rgba(0, 0, 0, 0.8);
     color: #fff;
     border-radius: 2px;
-    word-wrap: nowrap;
     pointer-events: none;
+    max-width: 350px;
   }
 
   /* Creates a small triangle extender for the tooltip */
@@ -25,36 +25,36 @@
   }
 
   /* Northward tooltips */
-  .tip.n:after {
+  .tip.nw:after {
     content: "\25BC";
     margin: -1px 0 0 0;
     top: 100%;
-    left: 0;
+    left: 10px;
     text-align: center;
   }
 
   /* Eastward tooltips */
-  .tip.e:after {
+  .tip.ne:after {
     content: "\25C0";
     margin: -4px 0 0 0;
-    top: 50%;
-    left: -8px;
+    top: 100%;
+    left: -10px;
   }
 
   /* Southward tooltips */
-  .tip.s:after {
+  .tip.sw:after {
     content: "\25B2";
     margin: 0 0 1px 0;
     top: -8px;
-    left: 0;
+    left: 10px;
     text-align: center;
   }
 
   /* Westward tooltips */
-  .tip.w:after {
+  .tip.se:after {
     content: "\25B6";
     margin: -4px 0 0 -1px;
-    top: 50%;
-    left: 100%;
+    top: -8px;
+    left: -10px;
   }
 }
