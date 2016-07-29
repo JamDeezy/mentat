@@ -1,37 +1,24 @@
-<!doctype html>
-<html>
-<head>
-  <title>f-bar-graph</title>
-  <link rel="import" href="../lib/f-bar-graph.html">
-  <style>
-    body {
-      margin: 0;
-      padding: 10px;
-    }
-    div.demo {
-      background: #efefef;
-      vertical-align: top;
-      margin: auto;
-    }
-  </style>
-</head>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/paper/bootstrap.min.css">
+<style>
+body {
+  margin: 0px;
+  padding: 0px;
+  background: #eeeeee;
+}
+#container {
+  width: 480px;
+  height: 640px;
+  margin: 40px 40px 40px 100px;
+  background: #ffffff;
+}
+
+</style>
 <body>
-<h1>> f-bar-graph</h1>
-<div class="demo">
-  <f-bar-graph
-    size='{"width":800,"height":200}'
-    axes='{"x":"State", "y": ["A","B","C","D"]}'
-    sorted="true"
-    vertical="true">
-  </f-bar-graph>
-  <f-bar-graph
-    size='{"width":800,"height":400}'
-    axes='{"x":"State", "y": ["A","B","C","D"]}'
-    sorted="true"
-    vertical="false">
-  </f-bar-graph>
-</div>
+  <div id="container"></div>
 </body>
+<script src="../mentat.js"></script>
 <script>
   var data = [
     {"State": "AL", "A": 310504, "B": 552339, "C": 259034, "D": 450818},
@@ -55,12 +42,26 @@
     {"State": "MN", "A": 358471, "B": 606802, "C": 289371, "D": 507289},
     {"State": "MS", "A": 220813, "B": 371502, "C": 174405, "D": 305964},
     {"State": "MO", "A": 399450, "B": 690476, "C": 331543, "D": 560463}
-  ]
+  ].sort(function(a, b) {
+    aTotal = a.A + a.B + a.C + a.D;
+    bTotal = b.A + b.B + b.C + b.D;
+    return bTotal - aTotal;
+  })
 
-  var graphs = document.querySelectorAll('f-bar-graph')
-  for (var i = 0; i < graphs.length; i++) {
-    graphs[i].load(data)
-    .render()
-  }
+  mentat(
+    '#container', 'bar', data,
+    { dimension: "State", metric: ["A","B","C","D"] },
+    {
+      tooltip: function(d) {
+        var str = ""
+        str += "<strong>State " + d.key + "</strong><br>";
+        str += "A: " + d.value[0] + "<br>";
+        str += "B: " + d.value[1] + "<br>";
+        str += "C: " + d.value[2] + "<br>";
+        str += "D: " + d.value[3] + "<br>";
+        return str;
+      }
+    }
+  )
 </script>
 </html>

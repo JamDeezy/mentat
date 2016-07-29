@@ -15,63 +15,42 @@ function Tooltip(parent, html) {
   tip.parent   = d3.select(parent),
   tip.html     = html;
 
-  // Create our div node!
-  // NOTE: we append to parent, which is not
-  // the svg, as svg's cannot render <div>'s
-  tip.div = tip.parent
-    .append("div")
-    .classed("tip n", true)
-    .style("opacity", 0);
 
-  // TODO?
-  tip.place = function(pos) {
-    // Find out position and then check direction
-    var adjustedPos = adjustpos.apply(this,[pos]);
-    tip.div.style("left", adjustedPos[0] + "px")
-      .style("top", adjustedPos[1] + "px");
-  }
-
-  //
+  // Render our tooltip in the scope
+  // of whatever element we're bound to.
   tip.show = function(data) {
+    var ret = tip.html.apply(this, [data]);
+
     // Fill our tip by applying our callback
-    var str = tip.html.apply(this, [data]);
-    if (str) tip.div.html(str);
+    // Also apply position if we got an array
+    if (ret instanceof Array) {
+      tip.div.html(ret[0]);
+      place.apply(this, [ret[1]]);
+    } else {
+      var position = d3.mouse(this)
 
-    // Locate and place our tooltip
+      tip.div.html(ret);
+      place.apply(this,[position]);
+    }
+
+    // Set visible
     tip.div.transition()
-      .duration(300)
+      .duration(150)
       .style("opacity", 1);
-
-    var position = d3.mouse(this)
-    tip.place.apply(this,[position]);
   }
 
-  //
+
+  // Hide our tooltip
+  // by reducing opacity to 0
   tip.hide = function() {
     tip.div.transition()
-      .duration(300)
+      .duration(150)
       .style("opacity", 0);
   }
 
-  // Proxy attr calls to the tooltip div.
-  tip.attr = function(n, v) {
-    if (arguments.length < 2 && typeof n === 'string') {
-      return tip.div.attr(n);
-    } else {
-      return tip.div.attr(n, v);
-    }
-  }
 
-  // Proxy style calls to the tooltip div.
-  tip.style = function(n, v) {
-    if (arguments.length < 2 && typeof n === 'string') {
-      return tip.div.style(n);
-    } else {
-      return tip.div.style(n, v);
-    }
-  }
-
-  // Adjust the position of input coordinates
+  // Place the tooltip, while adjusting
+  // the position of input coordinates
   // based on container [w,h] and tooltip [w,h]
   // Breakdown:
   //     Q4  |  Q1
@@ -84,7 +63,7 @@ function Tooltip(parent, html) {
   // Q3 is not the double negative quadrant since
   // our y-axis increases downwards, aka our origin
   // is in the top left hand corner.
-  function adjustpos(pos) {
+  function place(pos) {
     var div = tip.div.node()
       .getBoundingClientRect();
 
@@ -103,10 +82,21 @@ function Tooltip(parent, html) {
     // Q3. If there isn't enough space in Q3 for the
     // tooltip, we shift the pos til there is
     if (x - divw < 0)    p[0] += divw;
-    if (y        > svgh) p[1] -= divh;
+    if (y + divh > svgh) p[1] -= divh;
 
-    return p;
+    // Place
+    tip.div.style("left", p[0] + "px")
+      .style("top", p[1] + "px");
   }
+
+
+  // Create our div node!
+  // NOTE: we append to parent, which is not
+  // the svg, as svg's cannot render <div>'s
+  tip.div = tip.parent
+    .append("div")
+    .classed("tip n", true)
+    .style("opacity", 0);
 
   return tip;
 }

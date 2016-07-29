@@ -43,22 +43,32 @@ function DataSet(data, dimension, metric) {
 
   // Find the extent of our data set after rollup
   // i.e [min, max] values for graphing purposes
-  // @key - the key value of the vlaue we're grabbing
-  // TODO; should this return multi key entent or summed
-  ds.extent = function(key) {
-    var arr = ds.dsData.map(function(d) {
-      if (key instanceof Array) {
-        return d.values.source.map(function(e) {
-          return key.map(function(f) { return e[f] });
-        })
-      } else {
-        return d.values.source.map(function(e) {
-          return e[key]
-        })
-      }
-    }).flatten();
+  ds.extent = function(v) {
 
-    return d3.extent(arr);
+    if (v instanceof Function) {
+      // Use callback
+      return d3.extent(ds.dsData.map(function(d) {
+        return v(d.values.source);
+      }));
+
+    } else if (v instanceof Array) {
+      // Array needs some special handling
+      var arr = ds.dsData.map(function(d) {
+        return d.values.source.map(function(e) {
+          return v.map(function(f) { return e[f] });
+        })
+      }).flatten();
+      return d3.extent(arr)
+
+    } else {
+      // String
+      var arr = ds.dsData.map(function(d) {
+        return d.values.source.map(function(e) {
+          return e[v];
+        })
+      }).flatten();
+      return d3.extent(arr);
+    }
   }
 
 
@@ -88,10 +98,7 @@ function DataSet(data, dimension, metric) {
   // Roll up data set
   ds.dsData =
     d3.nest()
-      .key(function(d) {
-        return d[dimension] instanceof Date ?
-          d[dimension] : d[dimension].toLowerCase();
-      })
+      .key(function(d) { return d[dimension]; })
       .rollup(function(d) {
         // Detect multi-dimensional visualization
         // Store the metriccs in an array respective

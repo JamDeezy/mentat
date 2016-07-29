@@ -3,6 +3,7 @@ var moment = require("moment");
 // Libraries
 var Choropleth = require('./lib/Choropleth');
 var Line = require('./lib/Line');
+var Bar = require('./lib/Bar');
 
 function mentat(selector, type, key, data, opts) {
 
@@ -44,9 +45,14 @@ function mentat(selector, type, key, data, opts) {
         opts.tooltip
       );
 
-
-    // // TODO maybe should be histogram
-    // case 'bar':
+    // Bar Graph - http://bl.ocks.org/mbostock/3886208
+    case 'bar':
+      return new Bar(
+        selector, key, data,
+        opts.axis,
+        opts.scale,
+        opts.tooltip
+      );
 
     default:
       console.warn(type + " is not implemented by mentat");
@@ -55,10 +61,12 @@ function mentat(selector, type, key, data, opts) {
 
 
 // TODO
-// 1) line graph
-// 2) bar graph
-// 3) add click callback
-// 4) introduce modes into various visualizations
+// - fix the difference between scale and coloring in bar/line
+// - introduce modes into various visualizations
+// - legend duh
+// - axis object d3????
+// - add click callback
+// - finish other TODOs
 
 // TODO tier 2
 // http://www.visualcinnamon.com/babynamesus
