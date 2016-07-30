@@ -74,6 +74,8 @@ function DataSet(data, dimension, metric) {
 
   // Need a transpose function for d3
   // TODO; should this return based on key or on metric
+  // TODO; stacked graphs need a different format than this
+  // which is actually good for grouped graphs
   ds.transpose = function(key) {
     if (key instanceof Array) {
       return key.map(function(d) {
@@ -85,12 +87,12 @@ function DataSet(data, dimension, metric) {
         }
       })
     } else {
-      return {
+      return [{
         key: key,
         values: ds.origData.map(function(d) {
           return { key: d[dimension], value: d[key] };
         })
-      }
+      }]
     }
   }
 

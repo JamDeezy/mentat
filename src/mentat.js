@@ -54,6 +54,7 @@ function mentat(selector, type, data, key, opts) {
         opts.tooltip
       );
 
+    // Bump Chart -
     default:
       console.warn(type + " is not implemented by mentat");
   }
@@ -61,16 +62,14 @@ function mentat(selector, type, data, key, opts) {
 
 
 // TODO
-// - fix the difference between scale and coloring in bar/line
-// - axis object d3????
-// - add click callback
-// - finish other TODOs
-// - legend duh
 // - introduce modes into various visualizations
+// - add click callback
+// - legend duh
+// http://www.visualcinnamon.com/babynamesus
 
 
 // TODO tier 2
-// http://www.visualcinnamon.com/babynamesus
+
 // http://dataaddict.fr/prenoms/#christelle,christophe,carole,berengere,aurelie,isabelle,david,jean,michel,philippe
 // http://bl.ocks.org/mbostock/3943967
 // http://bl.ocks.org/mbostock/1256572

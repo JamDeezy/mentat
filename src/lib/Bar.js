@@ -67,6 +67,7 @@ function Bar(selector, data, key, scale, color, tooltip) {
 
 
   // Configure the Y axis (dependent variable[s])
+  // Scale by 10% to give some vertical room
   // We want to sum up all the metrics for a stacked bar graph
   var yRange = bar.dataSet.extent(function(d) {
     var sum = 0;
@@ -77,8 +78,6 @@ function Bar(selector, data, key, scale, color, tooltip) {
     return sum;
   })
 
-  // Scale by 10% to give some vertical room
-  // Bottom should be 0
   bar.y.range([bar.base.height, 0])
     .domain([0, yRange[1] * 1.1]);
 
@@ -126,21 +125,29 @@ function Bar(selector, data, key, scale, color, tooltip) {
   // individual bars so we can color and stack
   stack.selectAll("rect")
     .data(function(d) {
-      var keys = bar.key.metric,
-          arr  = [],
-          sum  = 0;
+      if (bar.key.metric instanceof Array) {
+        var keys = bar.key.metric,
+            arr  = [],
+            sum  = 0;
 
-      // We want to create an array of stacking bars,
-      // aka: bar1.y1 = bar2.y0 && bar2.y1 = bar3.y0
-      for (var i = 0; i < keys.length; i++) {
-        arr.push({
-          x: keys[i],
-          y0: sum,
-          y1: sum += d.values.metric[i]
-        });
+        // We want to create an array of stacking bars,
+        // aka: bar1.y1 = bar2.y0 && bar2.y1 = bar3.y0
+        for (var i = 0; i < keys.length; i++) {
+          arr.push({
+            x: keys[i],
+            y0: sum,
+            y1: sum += d.values.metric[i]
+          });
+        }
+
+        return arr;
+      } else {
+        return [{
+          x: bar.key.metric,
+          y0: 0,
+          y1: d.values.metric
+        }];
       }
-
-      return arr;
     })
     .enter()
     .append("rect")
