@@ -5,7 +5,7 @@ var Choropleth = require('./lib/Choropleth');
 var Line = require('./lib/Line');
 var Bar = require('./lib/Bar');
 
-function mentat(selector, type, key, data, opts) {
+function mentat(selector, type, data, key, opts) {
 
   // We want to make sure all our required components
   // are available
@@ -30,27 +30,27 @@ function mentat(selector, type, key, data, opts) {
     // the average values of a property or quantity in those areas.
     case 'choropleth':
       return new Choropleth(
-        selector, key, data,
-        typeof opts.country === 'undefined' ? 'ca' : opts.country,
-        opts.scale,
+        selector, data, key,
+        opts.country || 'ca',
+        opts.color,
         opts.tooltip
       );
 
     // Line Graph - http://bl.ocks.org/mbostock/3884955
     case 'line':
       return new Line(
-        selector, key, data,
-        opts.axis,
+        selector, data, key,
         opts.scale,
+        opts.color,
         opts.tooltip
       );
 
     // Bar Graph - http://bl.ocks.org/mbostock/3886208
     case 'bar':
       return new Bar(
-        selector, key, data,
-        opts.axis,
+        selector, data, key,
         opts.scale,
+        opts.color,
         opts.tooltip
       );
 
@@ -62,11 +62,12 @@ function mentat(selector, type, key, data, opts) {
 
 // TODO
 // - fix the difference between scale and coloring in bar/line
-// - introduce modes into various visualizations
-// - legend duh
 // - axis object d3????
 // - add click callback
 // - finish other TODOs
+// - legend duh
+// - introduce modes into various visualizations
+
 
 // TODO tier 2
 // http://www.visualcinnamon.com/babynamesus

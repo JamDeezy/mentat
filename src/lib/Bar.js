@@ -13,78 +13,20 @@ require("../stylesheets/bar.scss");
 var DEFCOLORS = ["#98abc5", "#8a89a6", "#7b6888", "#6b486b",
                  "#a05d56", "#d0743c", "#ff8c00"];
 
-function Bar(selector, data, key, axis, scale, tooltip) {
+// Bar
+//
+function Bar(selector, data, key, scale, color, tooltip) {
   // Scope our variables
   var bar     = this;
   bar.base    = new BaseSVG(selector, 'bar'),
   bar.dataSet = new DataSet(data, key.dimension, key.metric),
   bar.key     = key,
-  bar.scale   = scale,
+  bar.scale   = scale || {},
+  bar.color   = color,
   bar.tooltip = tooltip,
-  bar.x = (bar.scale && bar.scale.x) ?
-          bar.scale.x : d3.scale.ordinal(),
-  bar.y = (bar.scale && bar.scale.y) ?
-          bar.scale.y : d3.scale.linear();
-  bar.z = d3.scale.ordinal();
-
-
-  // Colors
-  // TODO, we could refactor graph objects
-  // (i.e. axes, stroke) into another class
-  bar.stroke = function(d) {
-    // If its a function, we assume they passed in a d3 function
-    if (bar.scale instanceof Function) {
-      return bar.scale(d);
-
-    // Compute a function that would map metrics to colors
-    // in the user defined array. NOTE: we're reinstanciating
-    // this function at every call... Bad?
-    } else if (bar.scale instanceof Array) {
-      return d3.scale.ordinal()
-        .range(bar.scale)
-        .domain(bar.key.metric)(d);
-
-    // Return our own default colors
-    } else {
-      return d3.scale.ordinal()
-        .range(DEFCOLORS)
-        .domain(bar.key.metric)(d);
-    }
-  }
-
-
-  // Axis
-  bar.axis = function(key, scale) {
-    // If they provide a function, we assume
-    // its a d3 axis object.
-    if (bar.axis[key] instanceof Function) {
-      return bar.axis[key]
-
-    // If the value is a hash, we'll create the d3 object
-    // based on the keys that are specified
-    } else if (bar.axis[key] instanceof Object) {
-      var axis = d3.svg.axis()
-        .orient(bar.axis[key].orient)
-        .scale(scale);
-
-      if (typeof bar.axis[key].ticks !== 'undefined')
-        axis.ticks(bar.axis[key].ticks);
-      if (typeof bar.axis[key].tickFormat != 'undefined')
-        axis.tickFormat(bar.axis[key].tickFormat);
-      if (typeof bar.axis[key].tickPadding != 'undefined')
-        axis.tickPadding(bar.axis[key].tickFormat);
-      if (typeof bar.axis[key].tickSize != 'undefined')
-        axis.tickSize(meta.tickSize);
-
-      return axis;
-
-    // Default axis
-    } else {
-      return d3.svg.axis()
-        .orient((key === 'x') ? 'bottom' : 'left')
-        .scale(scale);
-    }
-  }
+  bar.x       = bar.scale.x || d3.scale.ordinal(),
+  bar.y       = bar.scale.y || d3.scale.linear(),
+  bar.z       = d3.scale.ordinal();
 
 
   // Tooltip
@@ -110,6 +52,8 @@ function Bar(selector, data, key, axis, scale, tooltip) {
   bar.svg = bar.base.svg;
   bar.base.setState(BaseSVG.stateENUM.LOADING);
 
+
+  // Instantiate axes
   // Configure the X axis (independent variable)
   bar.x.rangeRoundBands([0, bar.base.width], .08)
     .domain(bar.dataSet.origData.map(function(d) {
@@ -119,12 +63,12 @@ function Bar(selector, data, key, axis, scale, tooltip) {
   bar.svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + bar.base.height + ")")
-    .call(bar.axis('x', bar.x));
+    .call(d3.svg.axis().scale(bar.x).orient('bottom'));
+
 
   // Configure the Y axis (dependent variable[s])
-  // We want to sum up all the metrics for a stacked
-  // bar graph
-  var yxtent = bar.dataSet.extent(function(d) {
+  // We want to sum up all the metrics for a stacked bar graph
+  var yRange = bar.dataSet.extent(function(d) {
     var sum = 0;
     for (var i = 0, sum = 0;
          i < bar.key.metric.length; i++) {
@@ -136,14 +80,31 @@ function Bar(selector, data, key, axis, scale, tooltip) {
   // Scale by 10% to give some vertical room
   // Bottom should be 0
   bar.y.range([bar.base.height, 0])
-    .domain([0, yxtent[1] * 1.1]);
+    .domain([0, yRange[1] * 1.1]);
 
   bar.svg.append("g")
     .attr("class", "y axis")
-    .call(bar.axis('y', bar.y));
+    .call(d3.svg.axis().scale(bar.y).orient('left'));
 
-  bar.z.range(DEFCOLORS)
-    .domain(bar.key.metric);
+
+  // Configure the Z axis (coloring)
+  // We define the colors as the z-axis, as we're visualizing
+  // another dimension of information
+  if (bar.color instanceof Function) {
+    // If its a function, we assume they passed in a d3 function
+    bar.z = bar.color;
+
+  } else if (bar.scale instanceof Array) {
+    // Compute a function that would map metrics to colors
+    // in the user defined array.
+    bar.z.range(bar.scale)
+      .domain(bar.key.metric);
+
+  } else {
+    // Return our own default colors
+    bar.z.range(DEFCOLORS)
+      .domain(bar.key.metric);
+  }
 
 
   // Create an array of svg stacks

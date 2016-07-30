@@ -12,6 +12,7 @@ Compiled version of the library will be available via this url:
     //s3.amazonaws.com/f.wishabi.ca/mentat/1.0.0/mentat.min.js
     //s3.amazonaws.com/f.wishabi.ca/mentat/1.0.0/mentat.js
 
+Checkout tests to get a preview of what Mentat can do!
 
 ### SETUP:
 Simply run

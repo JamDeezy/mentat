@@ -35,17 +35,13 @@
     { dimension: 'province', metric: 'clicks' },
     {
       country: 'ca',
-      scale: function(dp, extent) {
+      color: function(extent) {
         // d3 log interpolation breaks on 0
         extent[0] = (extent[0] == 0) ? 1 : extent[0]
 
-        var log =
-          d3.scale.log()
-            .domain(extent)
-            .range(['#C6DBEF', '#08519C']),
-            value = (dp.value == 0) ? 1 : dp.value;
-
-        return log(dp.value);
+        return d3.scale.log()
+          .domain(extent)
+          .range(['#C6DBEF', '#08519C']);
       }
     }
   )
