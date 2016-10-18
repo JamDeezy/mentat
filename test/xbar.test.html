@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/paper/bootstrap.min.css">
+<style>
+body {
+  margin: 0px;
+  padding: 0px;
+  background: #eeeeee;
+}
+#container {
+  width: 720px;
+  height: 360px;
+  margin: 40px 40px 40px 120px;
+  background: #ffffff;
+}
+
+</style>
+<body>
+  <h2>&nbsp;XBar Test Page</h2>
+  <div id="container"></div>
+</body>
+<script src="../mentat.js"></script>
+<script>
+  var data = [
+    {flyer_type: "Flyer",              values: 42282.600000000006},
+    {flyer_type: "Specials",           values: 14993.490000000002},
+    {flyer_type: "Grocery Flyer",      values: 104245.84000000003},
+    {flyer_type: "Special Catalogues", values: 0},
+    {flyer_type: "Catalogue",          values: 10000.62},
+    {flyer_type: "Grand Opening",      values: 0}
+  ].sort(function(a, b) {
+    return b.values - a.values;
+  })
+
+  var colors = [
+    "#C6AAD1", "#7FC1C6", "#E6B464", "#E48271",
+    "#A0C589", "#D37798", "#8374A4", "#E8E0A1",
+    "#7C9FC4", "#AE5757", "#5F887C", "#B9AE9C"
+  ], counter = 0;
+
+  mentat(
+    '#container', 'xbar', data,
+    { dimension: "flyer_type", metric: ["values"] },
+    {
+      color: function(d) {
+        return colors[counter++%12]
+      },
+      tooltip: function(d) {
+        var str = ""
+        str += "<strong>" + d.key + "</strong><br>";
+        str += "Total Spend - $" + d3.format(",f")(d.value[0]) + "<br>";
+        return str;
+      }
+    }
+  )
+</script>
+</html>

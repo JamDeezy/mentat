@@ -4,6 +4,8 @@ var moment = require("moment");
 var Choropleth = require('./lib/Choropleth');
 var Line = require('./lib/Line');
 var Bar = require('./lib/Bar');
+var XBar = require('./lib/XBar')
+var Bump = require('./lib/Bump');
 
 function mentat(selector, type, data, key, opts) {
 
@@ -54,7 +56,25 @@ function mentat(selector, type, data, key, opts) {
         opts.tooltip
       );
 
-    // Bump Chart -
+    // X Bar Graph (horizontal)
+    case 'xbar':
+      return new XBar(
+        selector, data, key,
+        opts.scale,
+        opts.color,
+        opts.tooltip
+      )
+
+    // Bump Chart - http://www.visualcinnamon.com/babynamesus
+    case 'bump':
+      // [WIP]
+      // return new Bump(
+      //   selector, data, key,
+      //   opts.scale,
+      //   opts.color,
+      //   opts.tooltip
+      // );
+
     default:
       console.warn(type + " is not implemented by mentat");
   }
@@ -65,11 +85,10 @@ function mentat(selector, type, data, key, opts) {
 // - introduce modes into various visualizations
 // - add click callback
 // - legend duh
-// http://www.visualcinnamon.com/babynamesus
 
 
 // TODO tier 2
-
+// some sort of gantt chart
 // http://dataaddict.fr/prenoms/#christelle,christophe,carole,berengere,aurelie,isabelle,david,jean,michel,philippe
 // http://bl.ocks.org/mbostock/3943967
 // http://bl.ocks.org/mbostock/1256572

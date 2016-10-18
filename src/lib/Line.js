@@ -141,6 +141,9 @@ function Line(selector, data, key, scale, color, tooltip) {
     .attr("class", "overlay")
     .attr("width", line.base.width)
     .attr("height", line.base.height)
+
+    // The element must not capture pointer events as it
+    // is ment to serve as an invisible screen
     .style("fill", "none")
     .style("pointer-events", "all")
     .on("mouseout", line.tip.hide)
