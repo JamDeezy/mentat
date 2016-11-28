@@ -31,14 +31,10 @@ function Bar(selector, data, key, scale, color, tooltip) {
 
   // Tooltip
   var html = function(d) {
-    // Conform to format :)
     var dp  = bar.dataSet.findDs(d.key);
-
-    // We calculate the x/y position of the tooltip
     var x   = bar.x(d.key) + bar.x.rangeBand() / 2,
         y   = bar.y(d3.sum(dp.value));
 
-    // Return the tooltip string
     if (typeof bar.tooltip === 'undefined') {
       return "Tooltip missing!";
     } else {
@@ -60,10 +56,43 @@ function Bar(selector, data, key, scale, color, tooltip) {
       return d[bar.key.dimension]
     }));
 
-  bar.svg.append("g")
+
+  // When constructing the X axis, we have to be
+  // careful so the label width will never exceed
+  // rangeBand width.
+  var xLabels = bar.svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + bar.base.height + ")")
-    .call(d3.svg.axis().scale(bar.x).orient('bottom'));
+    .call(d3.svg.axis().scale(bar.x).orient('bottom'))
+    .selectAll("text")
+
+  // If any string exceeds our rangeBand width,
+  // we should rotate the text string so that
+  // the labels don't overlap.
+  var rotate = xLabels.filter(function(d) {
+    return this.getBBox().width > bar.x.rangeBand()
+  }).size() > 0;
+
+  if (rotate) {
+    xLabels
+      .style("text-anchor", "start")
+      .attr("transform", "rotate(65, 0, 9)" );
+
+    var style = window.getComputedStyle(bar.base.container),
+        marginBot = parseInt(style.marginBottom)
+        hypotenuse = marginBot/Math.cos(25);
+
+    // If any string from the resultant rotation
+    // exceeds our margin bottom, we should truncate
+    // the label (so it doesn't bleed out our element).
+    xLabels.each(function(d) {
+      if (this.getBoundingClientRect().height > marginBot) {
+        var i = 0;
+        for (; this.getSubStringLength(0, i) < hypotenuse; i++);
+        this.innerHTML = this.innerHTML.substring(0, i-4) + '...';
+      }
+    });
+  }
 
 
   // Configure the Y axis (dependent variable[s])

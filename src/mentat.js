@@ -44,7 +44,8 @@ function mentat(selector, type, data, key, opts) {
         selector, data, key,
         opts.scale,
         opts.color,
-        opts.tooltip
+        opts.tooltip,
+        opts.grid
       );
 
     // Bar Graph - http://bl.ocks.org/mbostock/3886208
@@ -53,7 +54,8 @@ function mentat(selector, type, data, key, opts) {
         selector, data, key,
         opts.scale,
         opts.color,
-        opts.tooltip
+        opts.tooltip,
+        opts.grid
       );
 
     // X Bar Graph (horizontal)
@@ -62,7 +64,8 @@ function mentat(selector, type, data, key, opts) {
         selector, data, key,
         opts.scale,
         opts.color,
-        opts.tooltip
+        opts.tooltip,
+        opts.grid
       )
 
     // Bump Chart - http://www.visualcinnamon.com/babynamesus
