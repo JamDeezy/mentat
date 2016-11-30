@@ -1,4 +1,5 @@
 /node_modules/*
 /mentat.js
+/mentat.js.map
 /mentat.min.js
 /npm-debug.log

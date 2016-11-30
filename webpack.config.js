@@ -7,6 +7,7 @@ var packjson = require('./package.json');
 module.exports = {
   context: __dirname,
   entry: "./src/mentat.js",
+  devtool: debug ? 'source-map' : 'eval',
   output: {
     filename: debug ? "./mentat.js" :  "./mentat.min.js",
     library: "mentat",

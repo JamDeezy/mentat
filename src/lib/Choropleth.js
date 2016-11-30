@@ -34,7 +34,7 @@ function Choropleth(selector, data, key, country, color, tooltip) {
   // Tooltip
   var html = function(d) {
     var dp = map.dataSet.findDs(d.properties.CODE);
-    if (!dp) return "No Data";
+    if (!(dp && dp.value)) return "No Data";
 
     return typeof map.tooltip === 'undefined' ?
       "Tooltip missing!" : map.tooltip(dp);
@@ -105,7 +105,7 @@ function Choropleth(selector, data, key, country, color, tooltip) {
       // based on that point
       .attr("fill", function(d) {
         var dp = map.dataSet.findDs(d.properties.CODE);
-        return (dp) ? map.fill(dp.value) : EMPTYCLR;
+        return (dp && dp.value) ? map.fill(dp.value) : EMPTYCLR;
       })
 
       // Hover here will return a geo json data point
