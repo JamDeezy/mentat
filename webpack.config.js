@@ -7,7 +7,7 @@ var packjson = require('./package.json');
 module.exports = {
   context: __dirname,
   entry: "./src/mentat.js",
-  devtool: debug ? 'source-map' : 'eval',
+  devtool: 'source-map',
   output: {
     filename: debug ? "./mentat.js" :  "./mentat.min.js",
     library: "mentat",
@@ -28,7 +28,9 @@ module.exports.plugins = debug ? [
   new webpack.optimize.DedupePlugin(),
   new webpack.optimize.OccurenceOrderPlugin(),
   new webpack.optimize.UglifyJsPlugin({
-    sourcemap: false
+    mangle: true,
+    output: { comments: false },
+    compress: { warnings: false }
   }),
   new webpack.ProvidePlugin({
     d3: 'd3', moment: 'moment', topojson: 'topojson'

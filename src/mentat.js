@@ -11,16 +11,21 @@ function mentat(selector, type, data, key, opts) {
 
   // We want to make sure all our required components
   // are available
-  if (typeof selector === 'undefined')
-    throw "Mentat: A valid selector is required.";
-  if (typeof type === 'undefined')
-    throw "Mentat: Pick a visualization type.";
-  if (typeof key === 'undefined')
-    throw "Mentat: Need a dimension/metric definition in key."
-  if (typeof data === 'undefined')
-    throw "Mentat: Missing data."
-  if (data.length < 1)
-    throw "Mentat: Data array is empty"
+  if (typeof selector === 'undefined') {
+    console.warn("Mentat: A valid selector is required."); return
+  }
+  if (typeof type === 'undefined') {
+    console.warn("Mentat: Pick a visualization type."); return
+  }
+  if (typeof key === 'undefined') {
+    console.warn("Mentat: Need a dimension/metric definition in key."); return
+  }
+  if (typeof data === 'undefined') {
+    console.warn("Mentat: Missing data."); return
+  }
+  if (data.length < 1) {
+    console.warn("Mentat: Data array is empty"); return
+  }
 
 
   // Mentat Visualization library
