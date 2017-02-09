@@ -59,7 +59,7 @@ function Choropleth(selector, data, key, country, color, tooltip) {
     map.fill = map.color(extent);
 
   } else if (map.color instanceof Array) {
-    var incr = (extent[1] - extent[0]) / (map.color.length);
+    var incr = Math.ceil((extent[1] - extent[0]) / (map.color.length));
     var range = d3.range(extent[0], extent[1], incr);
     range.shift();
 
@@ -79,7 +79,7 @@ function Choropleth(selector, data, key, country, color, tooltip) {
 
   var g = map.svg.append("g")
     .attr("class", "key")
-    .attr("transform", "translate(0,40)");
+    .attr("transform", "translate(-100,20)");
 
   g.selectAll("rect")
     .data(map.fill.range().map(function(d) {
@@ -96,7 +96,6 @@ function Choropleth(selector, data, key, country, color, tooltip) {
       .attr("fill", function(d) { return map.fill(d[0]); });
 
   g.call(d3.svg.axis().scale(x).orient('bottom')
-      .tickSize(13)
       .tickFormat(function(x) { return x })
       .tickValues(map.fill.domain()))
     .select(".domain")
