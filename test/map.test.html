@@ -15,15 +15,15 @@
 <script src="../mentat.js"></script>
 <script>
   var data = [ // array of data points
-    { province: 'ab', clicks: Math.random() * 100 },
-    { province: 'bc', clicks: Math.random() * 100 },
+    { province: 'ab', clicks: Math.random() * 10000 },
+    { province: 'bc', clicks: Math.random() * 10000 },
     { province: 'mb', clicks: Math.random() * 10000 },
-    { province: 'nb', clicks: Math.random() * 100 },
-    { province: 'nl', clicks: Math.random() * 100 },
-    { province: 'nt', clicks: Math.random() * 1000000 },
-    { province: 'ns', clicks: Math.random() * 100 },
-    { province: 'on', clicks: 0},
-    { province: 'pe', clicks: Math.random() * 100 },
+    { province: 'nb', clicks: Math.random() * 10000 },
+    { province: 'nl', clicks: Math.random() * 10000 },
+    { province: 'nt', clicks: Math.random() * 10000 },
+    { province: 'ns', clicks: Math.random() * 10000 },
+    { province: 'on', clicks: Math.random() * 10000},
+    { province: 'pe', clicks: Math.random() * 10000 },
     { province: 'qc', clicks: Math.random() * 10000 },
     { province: 'sk', clicks: Math.random() * 10000 },
     { province: 'nu', clicks: Math.random() * 10000 },
@@ -34,10 +34,12 @@
     { dimension: 'province', metric: 'clicks' },
     {
       country: 'ca',
-      color: ['#ffe8e4','#ffbdb2','#ff907e','#ff5f46','#ff3211'],
+      color: ['#ffe5e1', '#fec8bf','#fea89a','#fd8e7c','#fd735c','#f85b42'],
       tooltip: function(d) {
         return d.value;
       }
     }
   )
 </script>
+
+<!-- ['#c2d8ee', '#9cbaef','#c39ee0','#ff836f','#ee6763','#c35544'] -->

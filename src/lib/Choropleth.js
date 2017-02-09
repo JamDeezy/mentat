@@ -49,11 +49,12 @@ function Choropleth(selector, data, key, country, color, tooltip) {
 
   // Calculate our scale function
   // or use a user defined scaling function
-  var extent = map.dataSet.extent(map.key.metric);
+  var extent = d3.extent(
+    map.dataSet.dsData,
+    function(d) { return d.values.metric }
+  )
   extent[0] = Math.floor(extent[0]);
   extent[1] = Math.ceil(extent[1]);
-
-
 
   if (map.color instanceof Function) {
     map.fill = map.color(extent);
@@ -73,13 +74,20 @@ function Choropleth(selector, data, key, country, color, tooltip) {
       .range(DEFCOLORS);
   }
 
+  // Create a scale that rests on the top right corner
+  // width is half to the edge of the map
+  var scaleWidth = [
+    (map.base.width / 2) + (map.base.width * 0.1),
+    map.base.width
+  ]
+
   var x = d3.scale.linear()
     .domain(extent)
-    .rangeRound([600, 860]);
+    .rangeRound(scaleWidth);
 
   var g = map.svg.append("g")
     .attr("class", "key")
-    .attr("transform", "translate(-100,20)");
+    .attr("transform", "translate(0,20)");
 
   g.selectAll("rect")
     .data(map.fill.range().map(function(d) {
@@ -96,7 +104,7 @@ function Choropleth(selector, data, key, country, color, tooltip) {
       .attr("fill", function(d) { return map.fill(d[0]); });
 
   g.call(d3.svg.axis().scale(x).orient('bottom')
-      .tickFormat(function(x) { return x })
+      .tickFormat(function(d) { return d3.format('.2s')(d) })
       .tickValues(map.fill.domain()))
     .select(".domain")
       .remove();

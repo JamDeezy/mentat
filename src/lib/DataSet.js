@@ -44,7 +44,6 @@ function DataSet(data, dimension, metric) {
   // Find the extent of our data set after rollup
   // i.e [min, max] values for graphing purposes
   ds.extent = function(v) {
-
     if (v instanceof Function) {
       // Use callback
       return d3.extent(ds.dsData.map(function(d) {
