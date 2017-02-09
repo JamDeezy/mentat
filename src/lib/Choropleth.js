@@ -50,12 +50,21 @@ function Choropleth(selector, data, key, country, color, tooltip) {
   // Calculate our scale function
   // or use a user defined scaling function
   var extent = map.dataSet.extent(map.key.metric);
+  extent[0] = Math.floor(extent[0]);
+  extent[1] = Math.ceil(extent[1]);
+
+
+
   if (map.color instanceof Function) {
     map.fill = map.color(extent);
 
   } else if (map.color instanceof Array) {
-    map.fill = d3.scale.linear()
-      .domain(extent)
+    var incr = (extent[1] - extent[0]) / (map.color.length);
+    var range = d3.range(extent[0], extent[1], incr);
+    range.shift();
+
+    map.fill = d3.scale.threshold()
+      .domain(range)
       .range(map.color);
 
   } else {
@@ -64,6 +73,34 @@ function Choropleth(selector, data, key, country, color, tooltip) {
       .range(DEFCOLORS);
   }
 
+  var x = d3.scale.linear()
+    .domain(extent)
+    .rangeRound([600, 860]);
+
+  var g = map.svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,40)");
+
+  g.selectAll("rect")
+    .data(map.fill.range().map(function(d) {
+        d = map.fill.invertExtent(d)
+        if (d[0] == null) d[0] = x.domain()[0];
+        if (d[1] == null) d[1] = x.domain()[1];
+        return d;
+      })
+    )
+    .enter().append("rect")
+      .attr("height", 8)
+      .attr("x", function(d) { return x(d[0]); })
+      .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+      .attr("fill", function(d) { return map.fill(d[0]); });
+
+  g.call(d3.svg.axis().scale(x).orient('bottom')
+      .tickSize(13)
+      .tickFormat(function(x) { return x })
+      .tickValues(map.fill.domain()))
+    .select(".domain")
+      .remove();
 
   // Construct svg paths based on geoJson data,
   var url = (map.country === 'ca') ? CAGEOJSON : USGEOJSON;
