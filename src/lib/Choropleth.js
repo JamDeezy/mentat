@@ -34,7 +34,8 @@ function Choropleth(selector, data, key, country, color, tooltip) {
   // Tooltip
   var html = function(d) {
     var dp = map.dataSet.findDs(d.properties.CODE);
-    if (!(dp && dp.value)) return "No Data";
+    if (!(dp && dp.value))
+      return d.properties.CODE.toUpperCase() + ": No Data";
 
     return typeof map.tooltip === 'undefined' ?
       "Tooltip missing!" : map.tooltip(dp);
