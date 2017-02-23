@@ -30,7 +30,7 @@ function DataSet(data, dimension, metric) {
     var index  = bisect.left(ds.dsData, val, 1);
     var d0     = ds.dsData[index - 1],
         d1     = ds.dsData[index];
-        dp     = val - d0.key > d1.key - val ? d1 : d0;
+        dp     = val - d0.key > d1 && d1.key - val ? d1 : d0;
 
     // Format the return using standardized
     // key/value/src properties
