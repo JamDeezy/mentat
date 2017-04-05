@@ -79,8 +79,22 @@ function Zoom(selector, data, key, color, tooltip) {
     z.range(DEFCOLORS).domain(key.metric);
   }
 
-  var plot = d3.svg.line().x(d => x(d.key)).y(d => y(d.value));
-  var plot2 = d3.svg.line().x(d => x2(d.key)).y(d => y2(d.value));
+  var plot = d3.svg
+    .line()
+    .x(function(d) {
+      return x(d.key);
+    })
+    .y(function(d) {
+      return y(d.value);
+    });
+  var plot2 = d3.svg
+    .line()
+    .x(function(d) {
+      return x2(d.key);
+    })
+    .y(function(d) {
+      return y2(d.value);
+    });
 
   var svg = zoom.base.svg;
   zoom.base.setState(BaseSVG.stateENUM.LOADING);
