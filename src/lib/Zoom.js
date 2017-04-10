@@ -212,8 +212,6 @@ function Zoom(selector, data, key, color, tooltip) {
     // unfortunate variable naming :-/
     var x0 = x2.invert(a * width);
     var x1 = x2.invert(b * width);
-    console.log("x0", x0);
-    console.log("x1", x1);
     brush.extent([x0, x1]);
 
     // now draw the brush to match our extent
