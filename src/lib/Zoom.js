@@ -199,10 +199,20 @@ function Zoom(selector, data, key, color, tooltip) {
     .attr("y", -6)
     .attr("height", height2 + 7);
 
-  // call drawBrush once on load with the default value
-  var zoomA = 0;
-  var zoomB = 1;
-  drawBrush(zoomA, zoomB);
+  var box = context.node().getBBox();
+  context
+    .append("text")
+    .text("Drag to zoom")
+    .attr("font-size", "50")
+    .attr("font-weight", "bold")
+    .attr("opacity", "0.3")
+    .attr("letter-spacing", "0.7em")
+    .attr("text-anchor", "middle")
+    .attr("pointer-events", "none")
+    .attr("y", box.height / 2)
+    .attr("x", box.width / 2 - 10)
+    .attr("font-family", "'Source Sans Pro', sans-serif")
+    .text("DRAG TO ZOOM");
 
   function drawBrush(a, b) {
     // define our brush extent
